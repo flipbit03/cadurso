@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "cadurso"
+version = "0.0.0"
+description = "Authorization framework for Python-based applications"
+authors = ["cadu <cadu.coelho@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pre-commit = "^4.0.1"
+pytest-asyncio = "^0.25.0"
+mypy = "^1.14.0"
+pytest-cov = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,24 @@
+# We specifically don't include the `src/**` folders, as each project (frontend, backend, etc) has their own
+# linting and formatting rules.
+# Everything else is linted and formatted using this top level pre-commit config
+files: ^(?!src/).*$
+
+# Use pre-commit hooks to enforce code style and formatting
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [ "--maxkb=4096" ]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.8.4
+    hooks:
+      # Run the linter, with --fix (to sort the imports).
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter
+      - id: ruff-format
