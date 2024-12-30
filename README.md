@@ -124,9 +124,7 @@ async def async_rule(actor: User, resource: Document) -> bool:
 cadurso.freeze()
 
 # (You are ready to query now)
-
-# The instance you defined the rules on is the one you should query with, so import it where needed
-# or pass it around. Essentially, use it as a singleton.
+# Use your `cadurso` instance as a singleton throughout your application
 ```
 
 #### Querying
