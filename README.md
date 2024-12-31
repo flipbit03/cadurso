@@ -1,4 +1,4 @@
-# 🐻Cadurso[^1]
+# 🐻cadurso
 Authorization framework for Python-based applications. Inspired by _[Oso](https://github.com/osohq/oso)_.
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cadurso)](https://pypi.org/project/cadurso/)
@@ -6,7 +6,7 @@ Authorization framework for Python-based applications. Inspired by _[Oso](https:
 
 ## Overview
 
-Cadurso is a lightweight and extensible authorization framework designed to handle access control scenarios by building and querying rules. It enables developers to define rules for actors performing actions on resources, with support for synchronous and asynchronous workflows. This library is inspired by the principles of the Oso framework, emphasizing flexibility and clarity in managing authorization.
+`cadurso`[^1] is a lightweight and extensible authorization framework designed to handle access control scenarios by building and querying rules. It enables developers to define rules for actors performing actions on resources, with support for synchronous and asynchronous workflows. This library is inspired by the principles of the Oso framework, emphasizing flexibility and clarity in managing authorization.
 
 ## Features
 
