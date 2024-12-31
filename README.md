@@ -179,7 +179,7 @@ Contributions are welcome! Please ensure tests are included for any new features
 ## License
 Cadurso is licensed under the MIT License. See the LICENSE file for details.
 
-[^1]: Oso means "bear" in Spanish. `Cadurso` is a portmanteau of "Cadu" (my nickname) and "Urso" ("bear", in Portuguese) 😉
+[^1]: Oso (the library we get inspiration from) means "bear" in Spanish. `Cadurso` is a portmanteau of "Cadu" (my nickname) and "Urso" ("bear", in Portuguese) 😉
 
 [^2]: **Important:** Rules should be pure functions, and avoid mutating the actors or resources passed to them.
       As we cannot enforce this at runtime, it is the responsibility of the developer to ensure this.
