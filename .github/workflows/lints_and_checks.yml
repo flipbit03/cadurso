@@ -12,8 +12,10 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout and get (possibly cached) Poetry/Pre-commit virtualenvs
-        uses: ./.github/actions/poetry_cached
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/poetry_cached
 
       - name: Static type checking with `mypy`
         run: |

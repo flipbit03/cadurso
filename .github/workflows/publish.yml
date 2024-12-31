@@ -14,8 +14,10 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout and get (possibly cached) Poetry/Pre-commit virtualenvs
-        uses: ./.github/actions/poetry_cached
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - uses: ./.github/actions/poetry_cached
 
       - name: Set version from GITHUB_REF
         run: |
