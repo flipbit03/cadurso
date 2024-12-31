@@ -1,4 +1,4 @@
-name: Tests
+name: Lints and Checks
 
 on:
   push:
@@ -8,11 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  lints_and_checks:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        python-version: [ "3.11", "3.12", "3.13" ]
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -20,6 +18,10 @@ jobs:
       - name: Get (possibly cached) Project/Pre-commit virtualenvs
         uses: ./.github/actions/poetry_cached
 
-      - name: Run Tests
+      - name: Static type checking with `mypy`
         run: |
-          poetry run pytest
+          poetry run mypy
+
+      - name: Linting with `pre-commit` and `ruff`
+        run: |
+          poetry run pre-commit run --all-files --show-diff-on-failure

@@ -1,4 +1,4 @@
-# We specifically don't include the `src/**` folders, as each project (frontend, backend, etc) has their own
+# We specifically don't include the `src/**` folders, as each project (frontend, backend, etc.) has their own
 # linting and formatting rules.
 # Everything else is linted and formatted using this top level pre-commit config
 files: ^(?!src/).*$
