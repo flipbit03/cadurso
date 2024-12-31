@@ -177,7 +177,7 @@ await cadurso.can(john).do(DocumentPermission.EDIT).on_async(johns_document)   #
 Contributions are welcome! Please ensure tests are included for any new features or bug fixes. Follow the standard pull request guidelines for this repository.
 
 ## License
-cadurso is licensed under the MIT License. See the LICENSE file for details.
+cadurso is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 [^1]: `Oso` (the library we get inspiration from) means "bear" in Spanish. `cadurso` is a portmanteau of "cadu" (my nickname) and "urso" ("bear", in Portuguese) 😉
 
