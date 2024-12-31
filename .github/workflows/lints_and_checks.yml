@@ -1,4 +1,4 @@
-name: Tests
+name: Lints and Checks
 
 on:
   push:
@@ -10,16 +10,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        python-version: [ "3.11", "3.12", "3.13" ]
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
