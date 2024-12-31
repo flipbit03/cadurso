@@ -208,7 +208,7 @@ class Cadurso:
         """
         return CanQueryBuilder(cadurso=self, actor=actor)
 
-    def freeze(self) -> Self:
+    def freeze(self) -> int:
         """
         Freeze the Cadurso instance, preventing new rules from being added.
 
