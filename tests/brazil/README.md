@@ -1,6 +1,6 @@
 ## Brazil (1985), RBAC-style
 
-This folder contains a full Cadurso RBAC[^1] implementation set in the [Brazil](https://en.wikipedia.org/wiki/Brazil_(1985_film))
+This folder contains a full cadurso RBAC[^1] implementation set in the [Brazil](https://en.wikipedia.org/wiki/Brazil_(1985_film))
 universe, with several actors (e.g., Sam Lowry, Tuttle) attempting to execute actions on resources (e.g., Paperwork, Ducts).
 These actions are modulated based on their roles (e.g., `CITIZEN`, `BUREAUCRAT`) and the system's rules.
 

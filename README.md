@@ -1,4 +1,4 @@
-# 🐻Cadurso[^1]
+# 🐻cadurso
 Authorization framework for Python-based applications. Inspired by _[Oso](https://github.com/osohq/oso)_.
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cadurso)](https://pypi.org/project/cadurso/)
@@ -6,7 +6,7 @@ Authorization framework for Python-based applications. Inspired by _[Oso](https:
 
 ## Overview
 
-Cadurso is a lightweight and extensible authorization framework designed to handle access control scenarios by building and querying rules. It enables developers to define rules for actors performing actions on resources, with support for synchronous and asynchronous workflows. This library is inspired by the principles of the Oso framework, emphasizing flexibility and clarity in managing authorization.
+`cadurso`[^1] is a lightweight and extensible authorization framework designed to handle access control scenarios by building and querying rules. It enables developers to define rules for actors performing actions on resources, with support for synchronous and asynchronous workflows. This library is inspired by the principles of the Oso framework, emphasizing flexibility and clarity in managing authorization.
 
 ## Features
 
@@ -22,7 +22,7 @@ Cadurso is a lightweight and extensible authorization framework designed to hand
 
 ## Core Concepts
 
-The core concepts of a Cadurso-powered authorization system are `Actors`, `Actions`, and `Resources`. They are combined into `Rules` which can be added to a `Cadurso` instance, represent capabilities within a system.
+The core concepts of a cadurso-powered authorization system are `Actors`, `Actions`, and `Resources`. They are combined into `Rules` which can be added to a `Cadurso()` instance, represent capabilities within a system.
 
 After defining rules, the framework can be marked as "frozen" to prevent further modifications, ensuring the integrity of the authorization system.
 
@@ -46,7 +46,7 @@ _(But any object that implements `__hash__` and `__eq__` can be used)_
 
 `Rules` are combinations of `Actors`, `Actions`, and `Resources`. They are expressed as Python functions that return a boolean value.
 
-Cadurso uses the type hints of the rule function to determine the types of the `Actor` and `Resource` arguments. The `Action` is passed as a parameter to the decorator that defines the rule.
+cadurso uses the type hints of the rule function to determine the types of the `Actor` and `Resource` arguments. The `Action` is passed as a parameter to the decorator that defines the rule.
 
 Rule format:
 ```python
@@ -165,11 +165,11 @@ await cadurso.can(john).do(DocumentPermission.EDIT).on_async(johns_document)   #
 
 #### More examples?
 
-- **ABAC** (Attribute-based Access Control) in Cadurso:
+- **ABAC** (Attribute-based Access Control) in cadurso:
   - Check [`/tests/akira/`](./tests/akira) for a full ABAC implementation set in the [Akira](https://en.wikipedia.org/wiki/Akira_(1988_film)) universe.
 
 
-- **RBAC** (Role-based Access Control) in Cadurso:
+- **RBAC** (Role-based Access Control) in cadurso:
   - The [`/tests/brazil/`](./tests/brazil) folder shows a full RBAC implementation set in the [Brazil](https://en.wikipedia.org/wiki/Brazil_(1985_film)) universe.
 
 
@@ -177,9 +177,9 @@ await cadurso.can(john).do(DocumentPermission.EDIT).on_async(johns_document)   #
 Contributions are welcome! Please ensure tests are included for any new features or bug fixes. Follow the standard pull request guidelines for this repository.
 
 ## License
-Cadurso is licensed under the MIT License. See the LICENSE file for details.
+cadurso is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-[^1]: Oso means "bear" in Spanish. `Cadurso` is a portmanteau of "Cadu" (my nickname) and "Urso" ("bear", in Portuguese) 😉
+[^1]: `Oso` (the library we get inspiration from) means "bear" in Spanish. `cadurso` is a portmanteau of "cadu" (my nickname) and "urso" ("bear", in Portuguese) 😉
 
 [^2]: **Important:** Rules should be pure functions, and avoid mutating the actors or resources passed to them.
       As we cannot enforce this at runtime, it is the responsibility of the developer to ensure this.
