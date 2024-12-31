@@ -19,7 +19,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pypoetry/virtualenvs
-        key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}-${{ hashFiles('.github/actions/cache_deps.yml') }}-${{ steps.setup-python.outputs.python-version }}
+        key: venv-${{ runner.os }}-${{ hashFiles('poetry.lock') }}-${{ hashFiles('.github/actions/cache_deps/action.yml') }}-${{ steps.setup-python.outputs.python-version }}
 
     - name: Install poetry dependencies, only if cache wasn't found
       run: |
@@ -31,7 +31,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pre-commit
-        key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ hashFiles('.github/actions/cache_deps.yml') }}-${{ steps.setup-python.outputs.python-version }}
+        key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}-${{ hashFiles('.github/actions/cache_deps/action.yml') }}-${{ steps.setup-python.outputs.python-version }}
 
     - name: Install pre-commit hooks, only if cache wasn't found
       run: |

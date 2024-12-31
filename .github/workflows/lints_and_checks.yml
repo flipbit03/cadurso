@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/cache_deps.yml
+      - uses: ./.github/actions/cache_deps
 
       - name: Static type checking with `mypy`
         run: |
