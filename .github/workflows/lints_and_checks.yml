@@ -22,14 +22,11 @@ jobs:
           python -m pip install poetry
           poetry install
 
-      - name: Run `pre-commit` and ensure no changes would be made
-        run: |
-          poetry run pre-commit run --all-files --show-diff-on-failure
-
-      - name: Run `mypy` and ensure no errors
+      - name: Static type checking with `mypy`
         run: |
           poetry run mypy
 
 
-
-
+      - name: Linting with `pre-commit` and `ruff`
+        run: |
+          poetry run pre-commit run --all-files --show-diff-on-failure
