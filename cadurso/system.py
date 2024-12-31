@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 import logging
-from typing import Callable, Hashable, Self, cast
+from typing import Callable, Hashable, cast
 
 from cadurso.errors import (
     ERROR_AUTH_FUNC_ACTION_NOT_HASHABLE,
