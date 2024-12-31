@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 import logging
-from typing import Callable, Hashable, cast
+from typing import Callable, Hashable, Self, cast
 
 from cadurso.errors import (
     ERROR_AUTH_FUNC_ACTION_NOT_HASHABLE,
@@ -208,7 +208,7 @@ class Cadurso:
         """
         return CanQueryBuilder(cadurso=self, actor=actor)
 
-    def freeze(self) -> int:
+    def freeze(self) -> Self:
         """
         Freeze the Cadurso instance, preventing new rules from being added.
 
