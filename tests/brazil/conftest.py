@@ -263,7 +263,7 @@ def brazil_authz(form_27b_6: OfficialForm) -> Cadurso:
     # DUCT RULES
     @brazil_universe.add_rule(DuctPermission.INSPECT)
     def engineer_inspects_duct(actor: Character, _duct: DuctSystem) -> bool:
-        """ENGINEERs are allowed to INSPECT duct systems."""
+        """ENGINEERS are allowed to INSPECT duct systems."""
         return Role.ENGINEER in actor.roles
 
     @brazil_universe.add_rule(DuctPermission.INSPECT)
@@ -273,13 +273,13 @@ def brazil_authz(form_27b_6: OfficialForm) -> Cadurso:
 
     @brazil_universe.add_rule(DuctPermission.INSPECT)
     def bureaucrat_inspects_duct(actor: Character, _duct: DuctSystem) -> bool:
-        """BUREAUCRATs want to keep an eye on everything, so they can INSPECT ducts as well."""
+        """BUREAUCRATS want to keep an eye on everything, so they can INSPECT ducts as well."""
         return Role.BUREAUCRAT in actor.roles
 
     @brazil_universe.add_rule(DuctPermission.REPAIR)
     def engineer_with_form_27b6(actor: Character, _duct: DuctSystem) -> bool:
         """
-        ENGINEERs may REPAIR a duct, but only if they are carrying the form 27B/6
+        ENGINEERS may REPAIR a duct, but only if they are carrying the form 27B/6
         in their pocket.
         """
         if Role.ENGINEER not in actor.roles:

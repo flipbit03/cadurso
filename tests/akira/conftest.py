@@ -358,7 +358,7 @@ def akira_authz(
 
     @akira_universe.add_rule(LocationPermission.DESTROY)
     def colonel_refuses_to_destroy_any_location(
-        actor: Character, location: Location
+        actor: Character, _location: Location
     ) -> bool:
         """The Colonel won't personally obliterate major locations on a whim."""
         return actor == colonel and False

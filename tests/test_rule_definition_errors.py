@@ -21,12 +21,26 @@ def test_fail_to_add_rule_to_frozen_cadurso_instance() -> None:
     You cannot add a rule to a frozen Cadurso instance.
     """
     cadurso = Cadurso()
-    cadurso.freeze()
+
+    # Freeze the instance
+    cadurso_frozen = cadurso.freeze()
+
+    # .freeze() returns itself.
+    # This is useful for re-exporting the authz system *after* defining all the rules. e.g:
+    #
+    # cadurso_base = Cadurso()
+    # @cadurso_base.add_rule(...)  (several times)
+    #
+    # Then, somewhere else in the code, probably in a top-level module:
+    # import cadurso_base from some_module
+    # cadurso = cadurso_base.freeze()
+    # __all__ = ["cadurso"]
+    assert cadurso_frozen is cadurso
 
     with pytest.raises(CadursoRuleDefinitionError) as exc_info:
 
         @cadurso.add_rule("test")
-        def this_rule_will_blow_up(actor: str, resource: str) -> bool:
+        def this_rule_will_blow_up(_actor: str, _resource: str) -> bool:
             return True
 
     assert cast(str, exc_info.value.args[0]) == ERROR_CANNOT_ADD_RULE_FROZEN
@@ -54,7 +68,7 @@ def test_fail_cannot_add_auth_function_with_more_than_two_parameters() -> None:
     with pytest.raises(CadursoRuleDefinitionError) as exc_info:
 
         @cadurso.add_rule("test")  # type: ignore
-        def this_rule_will_blow_up(actor: str, resource: str, extra: str) -> bool:
+        def this_rule_will_blow_up(_actor: str, _resource: str, _extra: str) -> bool:
             # Mypy will complain about this, but we're testing the runtime behavior
             return True
 
@@ -104,7 +118,7 @@ def test_fail_cannot_add_rule_with_nonpositional_params() -> None:
     with pytest.raises(CadursoRuleDefinitionError) as exc_info:
 
         @cadurso.add_rule("test")  # type: ignore
-        def this_rule_will_blow_up(actor: str, *, resource: str) -> bool:
+        def this_rule_will_blow_up(_actor: str, *, _resource: str) -> bool:
             # This function has 2 parameters, so the parameter count check will pass.
             # But the second parameter, `resource`, is a keyword-only argument
             # MyPy will complain about this, but we're testing the runtime behavior
@@ -120,7 +134,7 @@ def test_can_add_rule_with_only_positional_params() -> None:
     cadurso = Cadurso()
 
     @cadurso.add_rule("test")
-    def this_rule_will_not_blow_up(actor: str, resource: str, /) -> bool:
+    def this_rule_will_not_blow_up(_actor: str, _resource: str, /) -> bool:
         # Both of the parameters are positional *ONLY*, because of the `/` in the signature
         # This will work just fine
         return True
@@ -138,7 +152,7 @@ def test_fail_cannot_add_rule_that_does_not_return_bool() -> None:
     with pytest.raises(CadursoRuleDefinitionError) as exc_info:
         # MyPy will complain about this, but we're testing the runtime behavior, so we type-ignore
         @cadurso.add_rule("test")  # type: ignore
-        def this_rule_will_blow_up(actor: str, resource: str) -> str:
+        def this_rule_will_blow_up(_actor: str, _resource: str) -> str:
             # We don't care if non-zero length strings are truthy
             # We favor explicitness, as preconized in the Zen of Python *wink*
 
@@ -166,7 +180,7 @@ def test_cannot_add_rule_actor_is_not_a_type() -> None:
 
         # MyPy will complain about this, but we're testing the runtime behavior, so we type-ignore
         @cadurso.add_rule("test")
-        def this_rule_will_blow_up(actor: john, resource: int) -> bool:  # type: ignore
+        def this_rule_will_blow_up(_actor: john, _resource: int) -> bool:  # type: ignore
             # `john` is an instance, not a type
             return True
 
