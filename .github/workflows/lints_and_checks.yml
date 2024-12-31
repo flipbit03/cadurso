@@ -12,10 +12,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Get or set cached dependencies
-        uses: ./.github/actions/cache_deps
+      - name: Checkout and get (possibly cached) Poetry/Pre-commit virtualenvs
+        uses: ./.github/actions/poetry_cached
 
       - name: Static type checking with `mypy`
         run: |
