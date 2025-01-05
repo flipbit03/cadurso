@@ -2,6 +2,7 @@
 name = "cadurso"
 version = "0.0.0"
 description = "Authorization framework for Python-based applications"
+homepage = "https://github.com/flipbit03/cadurso"
 authors = ["cadu <cadu.coelho@gmail.com>"]
 license = "MIT"
 readme = "README.md"
