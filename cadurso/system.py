@@ -202,6 +202,44 @@ class Cadurso:
 
         return False
 
+    def allowed_actions(self, actor: Actor, resource: Resource) -> list[Action]:
+        """
+        Get a list of actions that the actor is allowed to perform on the resource.
+
+        :param actor: The actor that is trying to perform an action on a resource.
+        :param resource:  The resource that the actor is trying to perform the action on.
+        :return: A list of actions that the actor is allowed to perform on the resource.
+        """
+
+        rules_to_check: set[RuleStorageKey] = set(
+            filter(
+                lambda key: key[0] is type(actor) and key[2] is type(resource),
+                self.rule_storage.keys(),
+            )
+        )
+        logger.debug(
+            f"Found {len(rules_to_check)} rules to check for {actor=} and {resource=}"
+        )
+
+        allowed_actions = []
+        for rule_key in rules_to_check:
+            action = rule_key[1]
+            for rule in self.rule_storage[rule_key]:
+                if inspect.iscoroutinefunction(rule):
+                    decision = cast(bool, asyncio.run(rule(actor, resource)))
+                else:
+                    decision = cast(bool, rule(actor, resource))
+
+                if decision is not True:
+                    logger.debug(
+                        f'"{actor}" is not allowed to "{action}" on "{resource}", trying other rules...'
+                    )
+                    continue
+
+                logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
+                allowed_actions.append(action)
+                break
+
     def can(self, actor: Actor) -> CanQueryBuilder:
         """
         Syntax sugar for asking permissions (Query Builder-style).

@@ -43,3 +43,14 @@ def test_tetsuo_explode_bike_when_psychic_power_grows(
 
     tetsuo.psychic_level = 90
     assert akira_authz.is_allowed(tetsuo, BikePermission.EXPLODE, kaneda_bike)
+
+
+def test_what_tetsuo_is_allowed_to_do_to_his_own_bike(
+    akira_authz: Cadurso, tetsuo: Character, tetsuo_bike: Bike
+) -> None:
+    """
+    Tetsuo can do anything he wants to his own bike.
+    """
+
+    z = akira_authz.allowed_actions(tetsuo, tetsuo_bike)
+    print(z)
