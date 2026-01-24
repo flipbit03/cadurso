@@ -10,15 +10,17 @@ on:
 jobs:
   release:
     name: Build and Publish
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Get (possibly cached) Project/Pre-commit virtualenvs
-        uses: ./.github/actions/poetry_cached
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Set up Python
+        run: uv python install
 
       - name: Set version from GITHUB_REF
         run: |
@@ -27,16 +29,18 @@ jobs:
           # we also strip "v" from the version number, if it exists, getting "1.2.3"
           echo "GITHUB_REF: ${{ github.ref }}"
           export VERSION=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,' -e 's/^v//')
-          echo Setting version to $VERSION using poetry
-          poetry version $VERSION
+          echo Setting version to $VERSION
+          sed -i "s/^version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
+          echo "======================================"
+          echo "Version line in pyproject.toml:"
+          grep "^version" pyproject.toml
+          echo "======================================"
 
       - name: Build wheels and source tarball
-        run: |
-          poetry build
+        run: uv build
 
       - name: show temporary files
-        run: |
-          ls -l
+        run: ls -l
 
       - name: publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.13
