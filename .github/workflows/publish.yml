@@ -31,6 +31,10 @@ jobs:
           export VERSION=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,' -e 's/^v//')
           echo Setting version to $VERSION
           sed -i "s/^version = \"0.0.0\"/version = \"$VERSION\"/" pyproject.toml
+          echo "======================================"
+          echo "Version line in pyproject.toml:"
+          grep "^version" pyproject.toml
+          echo "======================================"
 
       - name: Build wheels and source tarball
         run: uv build
