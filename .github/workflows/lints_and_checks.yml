@@ -9,19 +9,17 @@ on:
 
 jobs:
   lints_and_checks:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Get (possibly cached) Project/Pre-commit virtualenvs
-        uses: ./.github/actions/poetry_cached
+      - name: Get (possibly cached) uv/Pre-commit virtualenvs
+        uses: ./.github/actions/uv_cached
 
       - name: Static type checking with `mypy`
-        run: |
-          poetry run mypy
+        run: uv run mypy
 
       - name: Linting with `pre-commit` and `ruff`
-        run: |
-          poetry run pre-commit run --all-files --show-diff-on-failure
+        run: uv run pre-commit run --all-files --show-diff-on-failure

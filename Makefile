@@ -3,4 +3,4 @@
 
 .PHONY: mypy-watch
 mypy-watch:
-	watch -n 2 mypy
+	watch -n 2 uv run mypy
