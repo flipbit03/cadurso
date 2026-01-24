@@ -11,7 +11,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 @dataclass
 class OnResourceClause:
-    can_query: "CanQueryBuilder"
+    can_query: CanQueryBuilder
     action: Action
 
     def on(self, resource: Resource) -> AuthorizationDecision:
@@ -33,7 +33,7 @@ class OnResourceClause:
 
 @dataclass
 class CanQueryBuilder:
-    cadurso: "Cadurso"
+    cadurso: Cadurso
     actor: Actor
 
     def do(self, action: Action) -> OnResourceClause:

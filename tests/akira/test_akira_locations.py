@@ -17,7 +17,8 @@ async def test_tetsuo_destroy_neotokyo_only_when_ready_async(
     Tetsuo needs to hit a terrifying psychic_level=100 first.
     """
     assert (
-        not await akira_authz.can(tetsuo)
+        not await akira_authz
+        .can(tetsuo)
         .do(LocationPermission.DESTROY)
         .on_async(neo_tokyo)
     )

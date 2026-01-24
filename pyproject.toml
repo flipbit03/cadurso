@@ -12,7 +12,8 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13"
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = []
 
@@ -21,7 +22,7 @@ dev = [
     "pytest>=8.3.4",
     "pre-commit>=4.0.1",
     "pytest-asyncio>=0.25.0",
-    "mypy>=1.14.0",
+    "mypy>=1.19.1",
     "pytest-cov>=6.0.0",
 ]
 
