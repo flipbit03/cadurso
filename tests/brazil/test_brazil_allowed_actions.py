@@ -36,7 +36,13 @@ def test_bureaucrat_form_permissions(
 def test_minister_full_form_permissions(
     brazil_authz: Cadurso, chief_minister: Character, form_27b_6: OfficialForm
 ) -> None:
-    """Ministers can perform all paperwork actions."""
+    """
+    Ministers can perform all paperwork actions.
+
+    Edge case: Verifies that get_allowed_actions() finds ALL matching actions,
+    not just the first one. The method must iterate through all rule storage keys
+    and collect every action that passes evaluation.
+    """
     allowed = brazil_authz.get_allowed_actions(chief_minister, form_27b_6)
 
     assert allowed == {
@@ -72,7 +78,13 @@ def test_engineer_duct_permissions_with_form(
     sample_duct: DuctSystem,
     form_27b_6: OfficialForm,
 ) -> None:
-    """Engineers can REPAIR ducts when they have Form 27B/6."""
+    """
+    Engineers can REPAIR ducts when they have Form 27B/6.
+
+    Edge case: Tests dynamic attribute-based access control in an RBAC context.
+    The rule checks actor.pocket_contents for the required form. Permissions
+    change based on mutable actor state (having the form or not).
+    """
     spoor.pocket_contents.append(form_27b_6)
 
     allowed = brazil_authz.get_allowed_actions(spoor, sample_duct)
@@ -84,7 +96,12 @@ def test_engineer_duct_permissions_with_form(
 def test_rebel_full_duct_permissions(
     brazil_authz: Cadurso, harry_tuttle: Character, sample_duct: DuctSystem
 ) -> None:
-    """Rebels have full access to duct operations (no paperwork needed)."""
+    """
+    Rebels have full access to duct operations (no paperwork needed).
+
+    Edge case: Verifies that get_allowed_actions() finds ALL matching actions.
+    Harry Tuttle gets all three duct permissions through his REBEL role.
+    """
     allowed = brazil_authz.get_allowed_actions(harry_tuttle, sample_duct)
 
     assert allowed == {
@@ -136,7 +153,13 @@ def test_dreamer_can_only_daydream_in_own_mind(
     sam_lowry: Character,
     jill_layton: Character,
 ) -> None:
-    """Dreamers can only DAYDREAM in their own mind (actor == resource)."""
+    """
+    Dreamers can only DAYDREAM in their own mind (actor == resource).
+
+    Edge case: The same object serves as both actor and resource. Tests that
+    type matching and rule evaluation work correctly when actor is resource.
+    The rule explicitly checks actor == other_actor.
+    """
     # Sam daydreaming in his own mind
     allowed_self = brazil_authz.get_allowed_actions(sam_lowry, sam_lowry)
     assert allowed_self == {DreamPermission.DAYDREAM}
@@ -149,7 +172,12 @@ def test_dreamer_can_only_daydream_in_own_mind(
 def test_non_dreamer_cannot_daydream(
     brazil_authz: Cadurso, jill_layton: Character
 ) -> None:
-    """Non-dreamers cannot DAYDREAM even in their own mind."""
+    """
+    Non-dreamers cannot DAYDREAM even in their own mind.
+
+    Edge case: Verifies that get_allowed_actions() correctly returns an empty set
+    when no rules match, rather than erroring or returning unexpected values.
+    """
     allowed = brazil_authz.get_allowed_actions(jill_layton, jill_layton)
 
     assert allowed == set()
@@ -167,7 +195,11 @@ def test_torturer_interrogation_permissions(
 def test_non_torturer_cannot_interrogate(
     brazil_authz: Cadurso, sam_lowry: Character, torture_room: InterrogationChamber
 ) -> None:
-    """Non-torturers cannot INTERROGATE."""
+    """
+    Non-torturers cannot INTERROGATE.
+
+    Edge case: Verifies empty set is returned when actor lacks required role.
+    """
     allowed = brazil_authz.get_allowed_actions(sam_lowry, torture_room)
 
     assert allowed == set()
@@ -178,7 +210,12 @@ def test_citizen_no_building_permissions(
     jill_layton: Character,
     central_services_office: GovernmentBuilding,
 ) -> None:
-    """Citizens have no permissions on government buildings."""
+    """
+    Citizens have no permissions on government buildings.
+
+    Edge case: Verifies that get_allowed_actions() correctly returns an empty set
+    when no rules match for the given actor type and resource type combination.
+    """
     allowed = brazil_authz.get_allowed_actions(jill_layton, central_services_office)
 
     assert allowed == set()
@@ -187,7 +224,13 @@ def test_citizen_no_building_permissions(
 def test_fluent_api_consistency(
     brazil_authz: Cadurso, harry_tuttle: Character, sample_duct: DuctSystem
 ) -> None:
-    """The fluent API returns the same result as the direct method."""
+    """
+    The fluent API returns the same result as the direct method.
+
+    Edge case: Ensures can(actor).allowed_actions_on(resource) is functionally
+    equivalent to get_allowed_actions(actor, resource). Both code paths must
+    produce identical results.
+    """
     direct_result = brazil_authz.get_allowed_actions(harry_tuttle, sample_duct)
     fluent_result = brazil_authz.can(harry_tuttle).allowed_actions_on(sample_duct)
 
@@ -198,7 +241,12 @@ def test_fluent_api_consistency(
 async def test_fluent_api_async_consistency(
     brazil_authz: Cadurso, harry_tuttle: Character, sample_duct: DuctSystem
 ) -> None:
-    """The async fluent API returns the same result as the direct async method."""
+    """
+    The async fluent API returns the same result as the direct async method.
+
+    Edge case: Ensures can(actor).allowed_actions_on_async(resource) is functionally
+    equivalent to get_allowed_actions_async(actor, resource).
+    """
     direct_result = await brazil_authz.get_allowed_actions_async(
         harry_tuttle, sample_duct
     )
@@ -216,7 +264,13 @@ def test_multiple_roles_accumulate_permissions(
     torture_room: InterrogationChamber,
     central_services_office: GovernmentBuilding,
 ) -> None:
-    """Jack Lint (BUREAUCRAT + TORTURER) accumulates permissions from both roles."""
+    """
+    Jack Lint (BUREAUCRAT + TORTURER) accumulates permissions from both roles.
+
+    Edge case: Verifies that having multiple roles doesn't cause conflicts or
+    missed permissions. Each resource type query should return permissions
+    granted by any of the actor's roles.
+    """
     # Form permissions from BUREAUCRAT role
     # NOT allowed: PaperworkPermission.ARCHIVE_FORM
     form_allowed = brazil_authz.get_allowed_actions(jack_lint, form_27b_6)
