@@ -28,38 +28,35 @@ def test_kaneda_allowed_actions_on_own_bike(
     """Kaneda can DRIVE and MODIFY his own bike, but not EXPLODE it."""
     allowed = akira_authz.get_allowed_actions(kaneda, kaneda_bike)
 
-    assert BikePermission.DRIVE in allowed
-    assert BikePermission.MODIFY in allowed
-    assert BikePermission.EXPLODE not in allowed
+    # NOT allowed: BikePermission.EXPLODE
+    assert allowed == {BikePermission.DRIVE, BikePermission.MODIFY}
 
 
 def test_colonel_allowed_actions_on_any_bike(
     akira_authz: Cadurso, colonel: Character, kaneda_bike: Bike, tetsuo_bike: Bike
 ) -> None:
     """The Colonel can DRIVE any bike (authority), but cannot MODIFY or EXPLODE."""
+    # NOT allowed: BikePermission.MODIFY, BikePermission.EXPLODE
     allowed_on_kaneda_bike = akira_authz.get_allowed_actions(colonel, kaneda_bike)
-    assert BikePermission.DRIVE in allowed_on_kaneda_bike
-    assert BikePermission.MODIFY not in allowed_on_kaneda_bike
-    assert BikePermission.EXPLODE not in allowed_on_kaneda_bike
+    assert allowed_on_kaneda_bike == {BikePermission.DRIVE}
 
+    # NOT allowed: BikePermission.MODIFY, BikePermission.EXPLODE
     allowed_on_tetsuo_bike = akira_authz.get_allowed_actions(colonel, tetsuo_bike)
-    assert BikePermission.DRIVE in allowed_on_tetsuo_bike
-    assert BikePermission.MODIFY not in allowed_on_tetsuo_bike
+    assert allowed_on_tetsuo_bike == {BikePermission.DRIVE}
 
 
 def test_tetsuo_actions_grow_with_psychic_power(
     akira_authz: Cadurso, tetsuo: Character, kaneda_bike: Bike
 ) -> None:
     """Tetsuo's allowed actions on bikes change as his psychic power grows."""
-    # At initial psychic_level=8, Tetsuo can only drive his own bike
-    # He shouldn't be able to EXPLODE any bike yet
+    # At initial psychic_level=8, Tetsuo cannot do anything on Kaneda's bike
     allowed_low_power = akira_authz.get_allowed_actions(tetsuo, kaneda_bike)
-    assert BikePermission.EXPLODE not in allowed_low_power
+    assert allowed_low_power == set()
 
     # At psychic_level=90, Tetsuo gains the ability to EXPLODE bikes
     tetsuo.psychic_level = 90
     allowed_high_power = akira_authz.get_allowed_actions(tetsuo, kaneda_bike)
-    assert BikePermission.EXPLODE in allowed_high_power
+    assert allowed_high_power == {BikePermission.EXPLODE}
 
 
 def test_tetsuo_allowed_actions_on_own_bike(
@@ -68,8 +65,8 @@ def test_tetsuo_allowed_actions_on_own_bike(
     """Tetsuo can DRIVE and MODIFY his own bike."""
     allowed = akira_authz.get_allowed_actions(tetsuo, tetsuo_bike)
 
-    assert BikePermission.DRIVE in allowed
-    assert BikePermission.MODIFY in allowed
+    # NOT allowed: BikePermission.EXPLODE (psychic_level too low)
+    assert allowed == {BikePermission.DRIVE, BikePermission.MODIFY}
 
 
 def test_colonel_full_facility_permissions(
@@ -80,14 +77,18 @@ def test_colonel_full_facility_permissions(
 ) -> None:
     """The Colonel has all facility permissions on any facility."""
     allowed_stadium = akira_authz.get_allowed_actions(colonel, olympic_stadium)
-    assert FacilityPermission.ENTER in allowed_stadium
-    assert FacilityPermission.SHUTDOWN in allowed_stadium
-    assert FacilityPermission.LAUNCH_STRIKE in allowed_stadium
+    assert allowed_stadium == {
+        FacilityPermission.ENTER,
+        FacilityPermission.SHUTDOWN,
+        FacilityPermission.LAUNCH_STRIKE,
+    }
 
     allowed_lab = akira_authz.get_allowed_actions(colonel, research_lab)
-    assert FacilityPermission.ENTER in allowed_lab
-    assert FacilityPermission.SHUTDOWN in allowed_lab
-    assert FacilityPermission.LAUNCH_STRIKE in allowed_lab
+    assert allowed_lab == {
+        FacilityPermission.ENTER,
+        FacilityPermission.SHUTDOWN,
+        FacilityPermission.LAUNCH_STRIKE,
+    }
 
 
 def test_doctor_facility_permissions(
@@ -97,11 +98,9 @@ def test_doctor_facility_permissions(
     olympic_stadium: MilitaryFacility,
 ) -> None:
     """Dr. Onishi can only ENTER his own lab (as overseer), not the stadium."""
-    # Can enter his own lab (overseer), but cannot shutdown or launch strikes
+    # NOT allowed: FacilityPermission.SHUTDOWN, FacilityPermission.LAUNCH_STRIKE
     allowed_lab = akira_authz.get_allowed_actions(doctor, research_lab)
-    assert FacilityPermission.ENTER in allowed_lab
-    assert FacilityPermission.SHUTDOWN not in allowed_lab
-    assert FacilityPermission.LAUNCH_STRIKE not in allowed_lab
+    assert allowed_lab == {FacilityPermission.ENTER}
 
     # Cannot do anything at the stadium (not overseer, not colonel, psychic_level=0 < security_level=10)
     allowed_stadium = akira_authz.get_allowed_actions(doctor, olympic_stadium)
@@ -116,17 +115,19 @@ def test_tetsuo_facility_access_by_psychic_power(
 ) -> None:
     """Tetsuo can infiltrate facilities when his psychic level exceeds security level."""
     # Initial psychic_level=8, lab security_level=8 - can enter lab
+    # NOT allowed: FacilityPermission.SHUTDOWN, FacilityPermission.LAUNCH_STRIKE
     allowed_lab = akira_authz.get_allowed_actions(tetsuo, research_lab)
-    assert FacilityPermission.ENTER in allowed_lab
+    assert allowed_lab == {FacilityPermission.ENTER}
 
     # Initial psychic_level=8, stadium security_level=10 - cannot enter stadium yet
     allowed_stadium = akira_authz.get_allowed_actions(tetsuo, olympic_stadium)
-    assert FacilityPermission.ENTER not in allowed_stadium
+    assert allowed_stadium == set()
 
     # Boost psychic power - now can enter stadium
+    # NOT allowed: FacilityPermission.SHUTDOWN, FacilityPermission.LAUNCH_STRIKE
     tetsuo.psychic_level = 50
     allowed_stadium_stronger = akira_authz.get_allowed_actions(tetsuo, olympic_stadium)
-    assert FacilityPermission.ENTER in allowed_stadium_stronger
+    assert allowed_stadium_stronger == {FacilityPermission.ENTER}
 
 
 def test_kei_no_bike_permissions(
@@ -144,8 +145,7 @@ def test_doctor_psychic_power_permissions(
     """Dr. Onishi can use powers he discovered, regardless of psychic level."""
     allowed = akira_authz.get_allowed_actions(doctor, telekinesis)
 
-    # Discovered by doctor, so can use it
-    assert PsychicPermission.USE_POWER in allowed
+    assert allowed == {PsychicPermission.USE_POWER}
 
 
 def test_tetsuo_psychic_power_permissions(
@@ -154,12 +154,12 @@ def test_tetsuo_psychic_power_permissions(
     """Tetsuo can use psychic powers when his level meets the requirement."""
     # Initial psychic_level=8, telekinesis requires 50
     allowed_weak = akira_authz.get_allowed_actions(tetsuo, telekinesis)
-    assert PsychicPermission.USE_POWER not in allowed_weak
+    assert allowed_weak == set()
 
     # Boost to required level
     tetsuo.psychic_level = 50
     allowed_strong = akira_authz.get_allowed_actions(tetsuo, telekinesis)
-    assert PsychicPermission.USE_POWER in allowed_strong
+    assert allowed_strong == {PsychicPermission.USE_POWER}
 
 
 def test_kaneda_brawl_anywhere(
@@ -169,11 +169,13 @@ def test_kaneda_brawl_anywhere(
     neo_tokyo: Location,
 ) -> None:
     """Kaneda can brawl in any location."""
+    # NOT allowed: LocationPermission.DESTROY
     allowed_harukiya = akira_authz.get_allowed_actions(kaneda, harukiya)
-    assert LocationPermission.BRAWL in allowed_harukiya
+    assert allowed_harukiya == {LocationPermission.BRAWL}
 
+    # NOT allowed: LocationPermission.DESTROY
     allowed_neo_tokyo = akira_authz.get_allowed_actions(kaneda, neo_tokyo)
-    assert LocationPermission.BRAWL in allowed_neo_tokyo
+    assert allowed_neo_tokyo == {LocationPermission.BRAWL}
 
 
 def test_fluent_api_consistency(
@@ -193,12 +195,12 @@ async def test_tetsuo_location_actions_async(
     """Test async variant with the DESTROY location rule (which is async)."""
     # At low power, Tetsuo cannot destroy Neo Tokyo
     allowed_weak = await akira_authz.get_allowed_actions_async(tetsuo, neo_tokyo)
-    assert LocationPermission.DESTROY not in allowed_weak
+    assert allowed_weak == set()
 
     # At full meltdown (psychic_level=100), Tetsuo can destroy Neo Tokyo
     tetsuo.psychic_level = 100
     allowed_meltdown = await akira_authz.get_allowed_actions_async(tetsuo, neo_tokyo)
-    assert LocationPermission.DESTROY in allowed_meltdown
+    assert allowed_meltdown == {LocationPermission.DESTROY}
 
 
 @pytest.mark.asyncio

@@ -29,9 +29,8 @@ def test_bureaucrat_form_permissions(
     """Bureaucrats can READ and SUBMIT forms, but not ARCHIVE them."""
     allowed = brazil_authz.get_allowed_actions(sam_lowry, form_27b_6)
 
-    assert PaperworkPermission.READ_FORM in allowed
-    assert PaperworkPermission.SUBMIT_FORM in allowed
-    assert PaperworkPermission.ARCHIVE_FORM not in allowed
+    # NOT allowed: PaperworkPermission.ARCHIVE_FORM
+    assert allowed == {PaperworkPermission.READ_FORM, PaperworkPermission.SUBMIT_FORM}
 
 
 def test_minister_full_form_permissions(
@@ -40,9 +39,11 @@ def test_minister_full_form_permissions(
     """Ministers can perform all paperwork actions."""
     allowed = brazil_authz.get_allowed_actions(chief_minister, form_27b_6)
 
-    assert PaperworkPermission.READ_FORM in allowed
-    assert PaperworkPermission.SUBMIT_FORM in allowed
-    assert PaperworkPermission.ARCHIVE_FORM in allowed
+    assert allowed == {
+        PaperworkPermission.READ_FORM,
+        PaperworkPermission.SUBMIT_FORM,
+        PaperworkPermission.ARCHIVE_FORM,
+    }
 
 
 def test_citizen_limited_form_permissions(
@@ -51,9 +52,8 @@ def test_citizen_limited_form_permissions(
     """Citizens can only SUBMIT forms."""
     allowed = brazil_authz.get_allowed_actions(jill_layton, form_27b_6)
 
-    assert PaperworkPermission.READ_FORM not in allowed
-    assert PaperworkPermission.SUBMIT_FORM in allowed
-    assert PaperworkPermission.ARCHIVE_FORM not in allowed
+    # NOT allowed: PaperworkPermission.READ_FORM, PaperworkPermission.ARCHIVE_FORM
+    assert allowed == {PaperworkPermission.SUBMIT_FORM}
 
 
 def test_engineer_duct_permissions_without_form(
@@ -62,9 +62,8 @@ def test_engineer_duct_permissions_without_form(
     """Engineers can INSPECT ducts but cannot REPAIR without Form 27B/6."""
     allowed = brazil_authz.get_allowed_actions(spoor, sample_duct)
 
-    assert DuctPermission.INSPECT in allowed
-    assert DuctPermission.REPAIR not in allowed
-    assert DuctPermission.DESTROY not in allowed
+    # NOT allowed: DuctPermission.REPAIR, DuctPermission.DESTROY
+    assert allowed == {DuctPermission.INSPECT}
 
 
 def test_engineer_duct_permissions_with_form(
@@ -74,14 +73,12 @@ def test_engineer_duct_permissions_with_form(
     form_27b_6: OfficialForm,
 ) -> None:
     """Engineers can REPAIR ducts when they have Form 27B/6."""
-    # Add the form to the engineer's pocket
     spoor.pocket_contents.append(form_27b_6)
 
     allowed = brazil_authz.get_allowed_actions(spoor, sample_duct)
 
-    assert DuctPermission.INSPECT in allowed
-    assert DuctPermission.REPAIR in allowed
-    assert DuctPermission.DESTROY not in allowed
+    # NOT allowed: DuctPermission.DESTROY
+    assert allowed == {DuctPermission.INSPECT, DuctPermission.REPAIR}
 
 
 def test_rebel_full_duct_permissions(
@@ -90,9 +87,11 @@ def test_rebel_full_duct_permissions(
     """Rebels have full access to duct operations (no paperwork needed)."""
     allowed = brazil_authz.get_allowed_actions(harry_tuttle, sample_duct)
 
-    assert DuctPermission.INSPECT in allowed
-    assert DuctPermission.REPAIR in allowed
-    assert DuctPermission.DESTROY in allowed
+    assert allowed == {
+        DuctPermission.INSPECT,
+        DuctPermission.REPAIR,
+        DuctPermission.DESTROY,
+    }
 
 
 def test_bureaucrat_duct_permissions(
@@ -101,9 +100,8 @@ def test_bureaucrat_duct_permissions(
     """Bureaucrats can INSPECT ducts (keeping an eye on things)."""
     allowed = brazil_authz.get_allowed_actions(mr_kurtzmann, sample_duct)
 
-    assert DuctPermission.INSPECT in allowed
-    assert DuctPermission.REPAIR not in allowed
-    assert DuctPermission.DESTROY not in allowed
+    # NOT allowed: DuctPermission.REPAIR, DuctPermission.DESTROY
+    assert allowed == {DuctPermission.INSPECT}
 
 
 def test_bureaucrat_building_permissions(
@@ -114,9 +112,8 @@ def test_bureaucrat_building_permissions(
     """Bureaucrats can ENTER departments but cannot ARREST or APPROVE_BUDGET."""
     allowed = brazil_authz.get_allowed_actions(sam_lowry, central_services_office)
 
-    assert BuildingPermission.ENTER_DEPARTMENT in allowed
-    assert BuildingPermission.ARREST_SUSPECTS not in allowed
-    assert BuildingPermission.APPROVE_BUDGET not in allowed
+    # NOT allowed: BuildingPermission.ARREST_SUSPECTS, BuildingPermission.APPROVE_BUDGET
+    assert allowed == {BuildingPermission.ENTER_DEPARTMENT}
 
 
 def test_minister_building_permissions(
@@ -127,9 +124,11 @@ def test_minister_building_permissions(
     """Ministers can ENTER and APPROVE_BUDGET but cannot ARREST."""
     allowed = brazil_authz.get_allowed_actions(chief_minister, central_services_office)
 
-    assert BuildingPermission.ENTER_DEPARTMENT in allowed
-    assert BuildingPermission.ARREST_SUSPECTS not in allowed
-    assert BuildingPermission.APPROVE_BUDGET in allowed
+    # NOT allowed: BuildingPermission.ARREST_SUSPECTS
+    assert allowed == {
+        BuildingPermission.ENTER_DEPARTMENT,
+        BuildingPermission.APPROVE_BUDGET,
+    }
 
 
 def test_dreamer_can_only_daydream_in_own_mind(
@@ -140,7 +139,7 @@ def test_dreamer_can_only_daydream_in_own_mind(
     """Dreamers can only DAYDREAM in their own mind (actor == resource)."""
     # Sam daydreaming in his own mind
     allowed_self = brazil_authz.get_allowed_actions(sam_lowry, sam_lowry)
-    assert DreamPermission.DAYDREAM in allowed_self
+    assert allowed_self == {DreamPermission.DAYDREAM}
 
     # Sam cannot daydream in Jill's mind
     allowed_other = brazil_authz.get_allowed_actions(sam_lowry, jill_layton)
@@ -153,7 +152,7 @@ def test_non_dreamer_cannot_daydream(
     """Non-dreamers cannot DAYDREAM even in their own mind."""
     allowed = brazil_authz.get_allowed_actions(jill_layton, jill_layton)
 
-    assert DreamPermission.DAYDREAM not in allowed
+    assert allowed == set()
 
 
 def test_torturer_interrogation_permissions(
@@ -162,7 +161,7 @@ def test_torturer_interrogation_permissions(
     """Torturers can INTERROGATE in chambers."""
     allowed = brazil_authz.get_allowed_actions(jack_lint, torture_room)
 
-    assert TorturePermission.INTERROGATE in allowed
+    assert allowed == {TorturePermission.INTERROGATE}
 
 
 def test_non_torturer_cannot_interrogate(
@@ -171,7 +170,7 @@ def test_non_torturer_cannot_interrogate(
     """Non-torturers cannot INTERROGATE."""
     allowed = brazil_authz.get_allowed_actions(sam_lowry, torture_room)
 
-    assert TorturePermission.INTERROGATE not in allowed
+    assert allowed == set()
 
 
 def test_citizen_no_building_permissions(
@@ -219,16 +218,20 @@ def test_multiple_roles_accumulate_permissions(
 ) -> None:
     """Jack Lint (BUREAUCRAT + TORTURER) accumulates permissions from both roles."""
     # Form permissions from BUREAUCRAT role
+    # NOT allowed: PaperworkPermission.ARCHIVE_FORM
     form_allowed = brazil_authz.get_allowed_actions(jack_lint, form_27b_6)
-    assert PaperworkPermission.READ_FORM in form_allowed
-    assert PaperworkPermission.SUBMIT_FORM in form_allowed
+    assert form_allowed == {
+        PaperworkPermission.READ_FORM,
+        PaperworkPermission.SUBMIT_FORM,
+    }
 
     # Interrogation permissions from TORTURER role
     chamber_allowed = brazil_authz.get_allowed_actions(jack_lint, torture_room)
-    assert TorturePermission.INTERROGATE in chamber_allowed
+    assert chamber_allowed == {TorturePermission.INTERROGATE}
 
     # Building permissions from BUREAUCRAT role
+    # NOT allowed: BuildingPermission.ARREST_SUSPECTS, BuildingPermission.APPROVE_BUDGET
     building_allowed = brazil_authz.get_allowed_actions(
         jack_lint, central_services_office
     )
-    assert BuildingPermission.ENTER_DEPARTMENT in building_allowed
+    assert building_allowed == {BuildingPermission.ENTER_DEPARTMENT}
