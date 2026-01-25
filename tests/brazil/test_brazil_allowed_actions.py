@@ -5,6 +5,8 @@ These tests verify that the allowed actions API correctly returns all actions
 an actor can perform on a resource, using the RBAC-style Brazil authorization system.
 """
 
+import pytest
+
 from cadurso import Cadurso
 
 from .conftest import (
@@ -189,6 +191,21 @@ def test_fluent_api_consistency(
     """The fluent API returns the same result as the direct method."""
     direct_result = brazil_authz.get_allowed_actions(harry_tuttle, sample_duct)
     fluent_result = brazil_authz.can(harry_tuttle).allowed_actions_on(sample_duct)
+
+    assert direct_result == fluent_result
+
+
+@pytest.mark.asyncio
+async def test_fluent_api_async_consistency(
+    brazil_authz: Cadurso, harry_tuttle: Character, sample_duct: DuctSystem
+) -> None:
+    """The async fluent API returns the same result as the direct async method."""
+    direct_result = await brazil_authz.get_allowed_actions_async(
+        harry_tuttle, sample_duct
+    )
+    fluent_result = await brazil_authz.can(harry_tuttle).allowed_actions_on_async(
+        sample_duct
+    )
 
     assert direct_result == fluent_result
 
