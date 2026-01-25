@@ -72,6 +72,8 @@ cadurso.freeze()
 ### Installation
 
 ```bash
+uv add cadurso      # or
+poetry add cadurso  # or
 pip install cadurso
 ```
 
