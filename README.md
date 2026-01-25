@@ -1,9 +1,9 @@
 # 🐻Cadurso[^1]
 Authorization framework for Python-based applications. Inspired by _[Oso](https://github.com/osohq/oso)_.
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cadurso)](https://pypi.org/project/cadurso/)
-[![PyPI - Version](https://img.shields.io/pypi/v/cadurso)](https://pypi.org/project/cadurso/)
-[![PyPI - Types](https://img.shields.io/pypi/types/cadurso)](https://pypi.org/project/cadurso/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cadurso?v=2)](https://pypi.org/project/cadurso/)
+[![PyPI - Version](https://img.shields.io/pypi/v/cadurso?v=2)](https://pypi.org/project/cadurso/)
+[![PyPI - Types](https://img.shields.io/pypi/types/cadurso?v=2)](https://pypi.org/project/cadurso/)
 
 ## Overview
 
