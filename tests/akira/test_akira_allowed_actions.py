@@ -221,6 +221,24 @@ def test_fluent_api_consistency(
     assert direct_result == fluent_result
 
 
+@pytest.mark.asyncio
+async def test_fluent_api_async_consistency(
+    akira_authz: Cadurso, tetsuo: Character, neo_tokyo: Location
+) -> None:
+    """
+    The async fluent API returns the same result as the direct async method.
+
+    Edge case: Ensures can(actor).allowed_actions_on_async(resource) is functionally
+    equivalent to get_allowed_actions_async(actor, resource).
+    """
+    tetsuo.psychic_level = 100
+
+    direct_result = await akira_authz.get_allowed_actions_async(tetsuo, neo_tokyo)
+    fluent_result = await akira_authz.can(tetsuo).allowed_actions_on_async(neo_tokyo)
+
+    assert direct_result == fluent_result
+
+
 def test_sync_api_evaluates_async_rules(
     akira_authz: Cadurso, tetsuo: Character, neo_tokyo: Location
 ) -> None:
@@ -260,21 +278,3 @@ async def test_async_api_evaluates_async_rules(
     tetsuo.psychic_level = 100
     allowed_meltdown = await akira_authz.get_allowed_actions_async(tetsuo, neo_tokyo)
     assert allowed_meltdown == {LocationPermission.DESTROY}
-
-
-@pytest.mark.asyncio
-async def test_fluent_api_async_consistency(
-    akira_authz: Cadurso, tetsuo: Character, neo_tokyo: Location
-) -> None:
-    """
-    The async fluent API returns the same result as the direct async method.
-
-    Edge case: Ensures can(actor).allowed_actions_on_async(resource) is functionally
-    equivalent to get_allowed_actions_async(actor, resource).
-    """
-    tetsuo.psychic_level = 100
-
-    direct_result = await akira_authz.get_allowed_actions_async(tetsuo, neo_tokyo)
-    fluent_result = await akira_authz.can(tetsuo).allowed_actions_on_async(neo_tokyo)
-
-    assert direct_result == fluent_result
