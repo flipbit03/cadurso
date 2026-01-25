@@ -21,6 +21,7 @@ dependencies = []
 [project.urls]
 homepage = "https://github.com/flipbit03/cadurso"
 source = "https://github.com/flipbit03/cadurso"
+issues = "https://github.com/flipbit03/cadurso/issues"
 
 [dependency-groups]
 dev = [
