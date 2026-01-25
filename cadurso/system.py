@@ -202,6 +202,78 @@ class Cadurso:
 
         return False
 
+    def get_allowed_actions(
+        self, actor: Actor, resource: Resource
+    ) -> set[Action]:
+        """
+        Return all actions an actor is allowed to perform on a resource.
+        If there are async rules, this method uses asyncio.run() to evaluate them.
+        If you are already in an async context, use get_allowed_actions_async() instead.
+
+        :param actor: The actor that wants to perform actions on a resource.
+        :param resource: The resource that the actor wants to perform actions on.
+        :return: A set of actions the actor is allowed to perform on the resource.
+        """
+        if not self.__frozen:
+            raise CadursoOperationalError(ERROR_INSTANCE_NOT_FROZEN)
+
+        allowed_actions: set[Action] = set()
+        actor_type = type(actor)
+        resource_type = type(resource)
+
+        for (stored_actor_type, action, stored_resource_type), rules in (
+            self.rule_storage.items()
+        ):
+            if stored_actor_type != actor_type or stored_resource_type != resource_type:
+                continue
+
+            for rule in rules:
+                if inspect.iscoroutinefunction(rule):
+                    decision = cast(bool, asyncio.run(rule(actor, resource)))
+                else:
+                    decision = cast(bool, rule(actor, resource))
+
+                if decision is True:
+                    allowed_actions.add(action)
+                    break  # No need to check other rules for this action
+
+        return allowed_actions
+
+    async def get_allowed_actions_async(
+        self, actor: Actor, resource: Resource
+    ) -> set[Action]:
+        """
+        Return all actions an actor is allowed to perform on a resource (async version).
+
+        :param actor: The actor that wants to perform actions on a resource.
+        :param resource: The resource that the actor wants to perform actions on.
+        :return: A set of actions the actor is allowed to perform on the resource.
+        """
+        if not self.__frozen:
+            raise CadursoOperationalError(ERROR_INSTANCE_NOT_FROZEN)
+
+        allowed_actions: set[Action] = set()
+        actor_type = type(actor)
+        resource_type = type(resource)
+
+        for (stored_actor_type, action, stored_resource_type), rules in (
+            self.rule_storage.items()
+        ):
+            if stored_actor_type != actor_type or stored_resource_type != resource_type:
+                continue
+
+            for rule in rules:
+                if inspect.iscoroutinefunction(rule):
+                    decision = await rule(actor, resource)
+                else:
+                    decision = rule(actor, resource)
+
+                if decision is True:
+                    allowed_actions.add(action)
+                    break  # No need to check other rules for this action
+
+        return allowed_actions
+
     def can(self, actor: Actor) -> CanQueryBuilder:
         """
         Syntax sugar for asking permissions (Query Builder-style).

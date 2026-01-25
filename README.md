@@ -166,6 +166,30 @@ await cadurso.is_allowed_async(john, DocumentPermission.EDIT, johns_document)  #
 await cadurso.can(john).do(DocumentPermission.EDIT).on_async(johns_document)   # Output: True
 ```
 
+#### Listing Allowed Actions
+
+Get all actions an actor can perform on a resource:
+
+```python
+# `.get_allowed_actions()` returns a set of all allowed actions
+cadurso.get_allowed_actions(john, johns_document)
+# Output: {DocumentPermission.EDIT, DocumentPermission.VIEW}
+
+cadurso.get_allowed_actions(john, gunnars_document)
+# Output: {DocumentPermission.VIEW}  (can view but not edit)
+
+cadurso.get_allowed_actions(gunnar, johns_document)
+# Output: {DocumentPermission.EDIT, DocumentPermission.VIEW}  (admin can do everything)
+
+# Alternate syntax with `.can()`
+cadurso.can(john).allowed_actions_on(johns_document)
+# Output: {DocumentPermission.EDIT, DocumentPermission.VIEW}
+
+# Async variants
+await cadurso.get_allowed_actions_async(john, johns_document)
+await cadurso.can(john).allowed_actions_on_async(johns_document)
+```
+
 #### More examples?
 
 - **ABAC** (Attribute-based Access Control) in Cadurso:
