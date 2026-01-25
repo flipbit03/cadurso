@@ -199,6 +199,8 @@ await cadurso.can(john).allowed_actions_on_async(johns_document)
 - **RBAC** (Role-based Access Control) in Cadurso:
   - The [`/tests/brazil/`](./tests/brazil) folder shows a full RBAC implementation set in the [Brazil (1985 film)](https://en.wikipedia.org/wiki/Brazil_(1985_film)) universe.
 
+> **Note:** If you've watched these films, the tests will be particularly enjoyable to read — you'll recognize characters, locations, and scenarios from the movies woven into the authorization rules!
+
 
 ## Contributing
 Contributions are welcome! Please ensure tests are included for any new features or bug fixes. Follow the standard pull request guidelines for this repository.
