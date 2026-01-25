@@ -18,6 +18,10 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/flipbit03/cadurso"
+Repository = "https://github.com/flipbit03/cadurso"
+
 [dependency-groups]
 dev = [
     "pytest>=8.3.4",
