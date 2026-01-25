@@ -19,8 +19,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/flipbit03/cadurso"
-Repository = "https://github.com/flipbit03/cadurso"
+homepage = "https://github.com/flipbit03/cadurso"
+source = "https://github.com/flipbit03/cadurso"
 
 [dependency-groups]
 dev = [
