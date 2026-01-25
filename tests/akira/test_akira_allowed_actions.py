@@ -38,12 +38,11 @@ def test_colonel_allowed_actions_on_any_bike(
 ) -> None:
     """The Colonel can DRIVE any bike (authority), but cannot MODIFY or EXPLODE."""
     allowed_on_kaneda_bike = akira_authz.get_allowed_actions(colonel, kaneda_bike)
-    allowed_on_tetsuo_bike = akira_authz.get_allowed_actions(colonel, tetsuo_bike)
-
     assert BikePermission.DRIVE in allowed_on_kaneda_bike
     assert BikePermission.MODIFY not in allowed_on_kaneda_bike
     assert BikePermission.EXPLODE not in allowed_on_kaneda_bike
 
+    allowed_on_tetsuo_bike = akira_authz.get_allowed_actions(colonel, tetsuo_bike)
     assert BikePermission.DRIVE in allowed_on_tetsuo_bike
     assert BikePermission.MODIFY not in allowed_on_tetsuo_bike
 
@@ -81,12 +80,14 @@ def test_colonel_full_facility_permissions(
 ) -> None:
     """The Colonel has all facility permissions on any facility."""
     allowed_stadium = akira_authz.get_allowed_actions(colonel, olympic_stadium)
-    allowed_lab = akira_authz.get_allowed_actions(colonel, research_lab)
+    assert FacilityPermission.ENTER in allowed_stadium
+    assert FacilityPermission.SHUTDOWN in allowed_stadium
+    assert FacilityPermission.LAUNCH_STRIKE in allowed_stadium
 
-    for allowed in [allowed_stadium, allowed_lab]:
-        assert FacilityPermission.ENTER in allowed
-        assert FacilityPermission.SHUTDOWN in allowed
-        assert FacilityPermission.LAUNCH_STRIKE in allowed
+    allowed_lab = akira_authz.get_allowed_actions(colonel, research_lab)
+    assert FacilityPermission.ENTER in allowed_lab
+    assert FacilityPermission.SHUTDOWN in allowed_lab
+    assert FacilityPermission.LAUNCH_STRIKE in allowed_lab
 
 
 def test_doctor_facility_permissions(
@@ -96,16 +97,14 @@ def test_doctor_facility_permissions(
     olympic_stadium: MilitaryFacility,
 ) -> None:
     """Dr. Onishi can only ENTER his own lab (as overseer), not the stadium."""
+    # Can enter his own lab (overseer), but cannot shutdown or launch strikes
     allowed_lab = akira_authz.get_allowed_actions(doctor, research_lab)
-    allowed_stadium = akira_authz.get_allowed_actions(doctor, olympic_stadium)
-
-    # Can enter his own lab (overseer)
     assert FacilityPermission.ENTER in allowed_lab
-    # Cannot shutdown or launch strikes (not colonel)
     assert FacilityPermission.SHUTDOWN not in allowed_lab
     assert FacilityPermission.LAUNCH_STRIKE not in allowed_lab
 
     # Cannot do anything at the stadium (not overseer, not colonel, psychic_level=0 < security_level=10)
+    allowed_stadium = akira_authz.get_allowed_actions(doctor, olympic_stadium)
     assert allowed_stadium == set()
 
 
@@ -116,16 +115,15 @@ def test_tetsuo_facility_access_by_psychic_power(
     olympic_stadium: MilitaryFacility,
 ) -> None:
     """Tetsuo can infiltrate facilities when his psychic level exceeds security level."""
-    # Initial psychic_level=8, lab security_level=8, stadium security_level=10
+    # Initial psychic_level=8, lab security_level=8 - can enter lab
     allowed_lab = akira_authz.get_allowed_actions(tetsuo, research_lab)
-    allowed_stadium = akira_authz.get_allowed_actions(tetsuo, olympic_stadium)
-
-    # Can enter lab (psychic_level >= security_level)
     assert FacilityPermission.ENTER in allowed_lab
-    # Cannot enter stadium yet
+
+    # Initial psychic_level=8, stadium security_level=10 - cannot enter stadium yet
+    allowed_stadium = akira_authz.get_allowed_actions(tetsuo, olympic_stadium)
     assert FacilityPermission.ENTER not in allowed_stadium
 
-    # Boost psychic power
+    # Boost psychic power - now can enter stadium
     tetsuo.psychic_level = 50
     allowed_stadium_stronger = akira_authz.get_allowed_actions(tetsuo, olympic_stadium)
     assert FacilityPermission.ENTER in allowed_stadium_stronger
@@ -172,9 +170,9 @@ def test_kaneda_brawl_anywhere(
 ) -> None:
     """Kaneda can brawl in any location."""
     allowed_harukiya = akira_authz.get_allowed_actions(kaneda, harukiya)
-    allowed_neo_tokyo = akira_authz.get_allowed_actions(kaneda, neo_tokyo)
-
     assert LocationPermission.BRAWL in allowed_harukiya
+
+    allowed_neo_tokyo = akira_authz.get_allowed_actions(kaneda, neo_tokyo)
     assert LocationPermission.BRAWL in allowed_neo_tokyo
 
 

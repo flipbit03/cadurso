@@ -142,7 +142,7 @@ def test_dreamer_can_only_daydream_in_own_mind(
 
     # Sam cannot daydream in Jill's mind
     allowed_other = brazil_authz.get_allowed_actions(sam_lowry, jill_layton)
-    assert DreamPermission.DAYDREAM not in allowed_other
+    assert allowed_other == set()
 
 
 def test_non_dreamer_cannot_daydream(
