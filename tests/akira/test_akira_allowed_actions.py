@@ -105,8 +105,8 @@ def test_doctor_facility_permissions(
     assert FacilityPermission.SHUTDOWN not in allowed_lab
     assert FacilityPermission.LAUNCH_STRIKE not in allowed_lab
 
-    # Cannot enter the stadium (not overseer, not colonel, psychic_level=0 < security_level=10)
-    assert FacilityPermission.ENTER not in allowed_stadium
+    # Cannot do anything at the stadium (not overseer, not colonel, psychic_level=0 < security_level=10)
+    assert allowed_stadium == set()
 
 
 def test_tetsuo_facility_access_by_psychic_power(
