@@ -17,7 +17,6 @@ from .conftest import (
     InterrogationChamber,
     OfficialForm,
     PaperworkPermission,
-    Role,
     TorturePermission,
 )
 
@@ -212,5 +211,7 @@ def test_multiple_roles_accumulate_permissions(
     assert TorturePermission.INTERROGATE in chamber_allowed
 
     # Building permissions from BUREAUCRAT role
-    building_allowed = brazil_authz.get_allowed_actions(jack_lint, central_services_office)
+    building_allowed = brazil_authz.get_allowed_actions(
+        jack_lint, central_services_office
+    )
     assert BuildingPermission.ENTER_DEPARTMENT in building_allowed

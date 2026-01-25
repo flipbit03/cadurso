@@ -202,9 +202,7 @@ class Cadurso:
 
         return False
 
-    def get_allowed_actions(
-        self, actor: Actor, resource: Resource
-    ) -> set[Action]:
+    def get_allowed_actions(self, actor: Actor, resource: Resource) -> set[Action]:
         """
         Return all actions an actor is allowed to perform on a resource.
         If there are async rules, this method uses asyncio.run() to evaluate them.
@@ -221,9 +219,11 @@ class Cadurso:
         actor_type = type(actor)
         resource_type = type(resource)
 
-        for (stored_actor_type, action, stored_resource_type), rules in (
-            self.rule_storage.items()
-        ):
+        for (
+            stored_actor_type,
+            action,
+            stored_resource_type,
+        ), rules in self.rule_storage.items():
             if stored_actor_type != actor_type or stored_resource_type != resource_type:
                 continue
 
@@ -256,9 +256,11 @@ class Cadurso:
         actor_type = type(actor)
         resource_type = type(resource)
 
-        for (stored_actor_type, action, stored_resource_type), rules in (
-            self.rule_storage.items()
-        ):
+        for (
+            stored_actor_type,
+            action,
+            stored_resource_type,
+        ), rules in self.rule_storage.items():
             if stored_actor_type != actor_type or stored_resource_type != resource_type:
                 continue
 
