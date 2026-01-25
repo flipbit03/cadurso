@@ -14,8 +14,14 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
 dependencies = []
+
+[project.urls]
+homepage = "https://github.com/flipbit03/cadurso"
+source = "https://github.com/flipbit03/cadurso"
+issues = "https://github.com/flipbit03/cadurso/issues"
 
 [dependency-groups]
 dev = [

@@ -3,6 +3,7 @@ Authorization framework for Python-based applications. Inspired by _[Oso](https:
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cadurso)](https://pypi.org/project/cadurso/)
 [![PyPI - Version](https://img.shields.io/pypi/v/cadurso)](https://pypi.org/project/cadurso/)
+[![PyPI - Types](https://img.shields.io/pypi/types/cadurso)](https://pypi.org/project/cadurso/)
 
 ## Overview
 
@@ -71,6 +72,8 @@ cadurso.freeze()
 ### Installation
 
 ```bash
+uv add cadurso      # or
+poetry add cadurso  # or
 pip install cadurso
 ```
 
@@ -166,11 +169,11 @@ await cadurso.can(john).do(DocumentPermission.EDIT).on_async(johns_document)   #
 #### More examples?
 
 - **ABAC** (Attribute-based Access Control) in Cadurso:
-  - Check [`/tests/akira/`](./tests/akira) for a full ABAC implementation set in the [Akira](https://en.wikipedia.org/wiki/Akira_(1988_film)) universe.
+  - Check [`/tests/akira/`](./tests/akira) for a full ABAC implementation set in the [Akira (1988 film)](https://en.wikipedia.org/wiki/Akira_(1988_film)) universe.
 
 
 - **RBAC** (Role-based Access Control) in Cadurso:
-  - The [`/tests/brazil/`](./tests/brazil) folder shows a full RBAC implementation set in the [Brazil](https://en.wikipedia.org/wiki/Brazil_(1985_film)) universe.
+  - The [`/tests/brazil/`](./tests/brazil) folder shows a full RBAC implementation set in the [Brazil (1985 film)](https://en.wikipedia.org/wiki/Brazil_(1985_film)) universe.
 
 
 ## Contributing
