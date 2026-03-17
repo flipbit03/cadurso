@@ -1,6 +1,6 @@
-"""Tests verifying AuthorizationDecision truthiness/falsiness and attribute access."""
+"""Tests verifying AuthorizationDecision behavior within the Inception universe."""
 
-from cadurso import AuthorizationDecision, Cadurso
+from cadurso import Cadurso
 
 from .conftest import Dreamer, DreamLevel, DreamPermission
 
@@ -72,52 +72,3 @@ def test_reason_populated_on_veto(
     decision = inception_universe.is_allowed(cobb, DreamPermission.NAVIGATE, limbo)
     assert not decision
     assert decision.reason == "dream level has collapsed"
-
-
-# ---------------------------------------------------------------------------
-# AuthorizationDecision class unit tests
-# ---------------------------------------------------------------------------
-
-
-def test_authorization_decision_bool_true() -> None:
-    d = AuthorizationDecision(allowed=True)
-    assert bool(d) is True
-
-
-def test_authorization_decision_bool_false() -> None:
-    d = AuthorizationDecision(allowed=False)
-    assert bool(d) is False
-
-
-def test_authorization_decision_repr_without_reason() -> None:
-    d = AuthorizationDecision(allowed=True)
-    assert repr(d) == "AuthorizationDecision(allowed=True)"
-
-
-def test_authorization_decision_repr_with_reason() -> None:
-    d = AuthorizationDecision(allowed=False, reason="nope")
-    assert repr(d) == "AuthorizationDecision(allowed=False, reason='nope')"
-
-
-def test_authorization_decision_equality() -> None:
-    a = AuthorizationDecision(allowed=True)
-    b = AuthorizationDecision(allowed=True)
-    assert a == b
-
-
-def test_authorization_decision_inequality_different_allowed() -> None:
-    a = AuthorizationDecision(allowed=True)
-    b = AuthorizationDecision(allowed=False)
-    assert a != b
-
-
-def test_authorization_decision_inequality_different_reason() -> None:
-    a = AuthorizationDecision(allowed=False, reason="a")
-    b = AuthorizationDecision(allowed=False, reason="b")
-    assert a != b
-
-
-def test_authorization_decision_not_equal_to_other_types() -> None:
-    d = AuthorizationDecision(allowed=True)
-    assert d != True  # noqa: E712
-    assert d != 1
