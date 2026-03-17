@@ -14,8 +14,11 @@ def test_team_member_navigates(
 ) -> None:
     assert inception_universe.is_allowed(arthur, DreamPermission.NAVIGATE, hotel_level)
 
-    # Same check via fluent API
-    assert inception_universe.can(arthur).do(DreamPermission.NAVIGATE).on(hotel_level)
+    # can().do().on() agrees
+    can_arthur_navigate_hotel = (
+        inception_universe.can(arthur).do(DreamPermission.NAVIGATE).on(hotel_level)
+    )
+    assert can_arthur_navigate_hotel
 
 
 def test_architect_navigates(
@@ -39,13 +42,11 @@ def test_mark_cannot_navigate_deep_levels(
         fischer, DreamPermission.NAVIGATE, snow_fortress
     )
 
-    # Same check via fluent API
-    assert (
-        not inception_universe
-        .can(fischer)
-        .do(DreamPermission.NAVIGATE)
-        .on(snow_fortress)
+    # can().do().on() agrees
+    can_fischer_navigate_fortress = (
+        inception_universe.can(fischer).do(DreamPermission.NAVIGATE).on(snow_fortress)
     )
+    assert not can_fischer_navigate_fortress
 
 
 def test_mark_navigates_shallow_levels(
@@ -126,8 +127,11 @@ def test_owner_inspects_own_totem(
 ) -> None:
     assert inception_universe.is_allowed(cobb, TotemPermission.INSPECT, cobbs_totem)
 
-    # Same check via fluent API
-    assert inception_universe.can(cobb).do(TotemPermission.INSPECT).on(cobbs_totem)
+    # can().do().on() agrees
+    can_cobb_inspect_totem = (
+        inception_universe.can(cobb).do(TotemPermission.INSPECT).on(cobbs_totem)
+    )
+    assert can_cobb_inspect_totem
 
 
 def test_arthur_inspects_own_totem(

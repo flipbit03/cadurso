@@ -19,9 +19,9 @@ def test_team_member_allowed_actions_on_normal_level(
     assert DreamPermission.ARCHITECT in actions
     assert DreamPermission.KICK in actions
 
-    # Fluent API returns the same set
-    fluent_actions = inception_universe.can(arthur).allowed_actions_on(hotel_level)
-    assert fluent_actions == actions
+    # can().allowed_actions_on() returns the same set
+    arthurs_hotel_actions = inception_universe.can(arthur).allowed_actions_on(hotel_level)
+    assert arthurs_hotel_actions == actions
 
 
 def test_mark_allowed_actions_on_shallow_level(
@@ -74,9 +74,9 @@ def test_non_owner_totem_vetoed(
     actions = inception_universe.get_allowed_actions(arthur, cobbs_totem)
     assert TotemPermission.INSPECT not in actions
 
-    # Fluent API also excludes vetoed actions
-    fluent_actions = inception_universe.can(arthur).allowed_actions_on(cobbs_totem)
-    assert TotemPermission.INSPECT not in fluent_actions
+    # can().allowed_actions_on() also excludes vetoed actions
+    arthurs_totem_actions = inception_universe.can(arthur).allowed_actions_on(cobbs_totem)
+    assert TotemPermission.INSPECT not in arthurs_totem_actions
 
 
 # ---------------------------------------------------------------------------
