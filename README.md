@@ -15,6 +15,8 @@ Cadurso is a lightweight and extensible authorization framework designed to hand
 - **Declarative Rule Definitions**: Define who can do what with ease. Rules are just Python functions[^2].
 - **Support for Sync and Async**: Handle both blocking and non-blocking authorization queries seamlessly. Rules can also be async.
 - **Immutable**: Prevent rule additions at runtime by freezing the authorization framework after defining rules.
+- **Rich Authorization Decisions**: `AuthorizationDecision` carries both the decision and an optional denial reason — fully backward-compatible with `bool`.
+- **Veto Mechanism**: `raise Veto("reason")` inside any rule to hard-deny a request, overriding all other rules.
 - **Error Handling**: Comprehensive exceptions for incomplete queries, operational issues, and rule definition errors.
 
 ## Use Cases
@@ -191,6 +193,49 @@ await cadurso.get_allowed_actions_async(john, johns_document)
 await cadurso.can(john).allowed_actions_on_async(johns_document)
 ```
 
+#### Veto: Hard-Denying Requests
+
+A rule can `raise Veto("reason")` to hard-deny a request. When a Veto fires, evaluation stops immediately — no further rules are checked — and the denial reason is captured in the `AuthorizationDecision`.
+
+```python
+from cadurso import Cadurso, Veto
+
+cadurso = Cadurso()
+
+@cadurso.add_rule("publish")
+def author_can_publish(actor: User, resource: Article) -> bool:
+    return actor == resource.author
+
+@cadurso.add_rule("publish")
+def suspended_users_cannot_publish(actor: User, resource: Article) -> bool:
+    if actor.suspended:
+        raise Veto("Account is suspended")
+    return False
+
+cadurso.freeze()
+```
+
+#### Inspecting Authorization Decisions
+
+`is_allowed()` and `is_allowed_async()` return an `AuthorizationDecision` object instead of a bare `bool`. It is fully backward-compatible — `if`, `assert`, `assert not` all work unchanged via `__bool__`.
+
+```python
+decision = cadurso.is_allowed(some_user, "publish", some_article)
+
+# Backward-compatible boolean usage
+if decision:
+    print("Allowed!")
+
+# Rich inspection
+if not decision:
+    print(decision.reason)  # "Account is suspended" or None
+```
+
+Key properties:
+- `decision.allowed` — `True` or `False`
+- `decision.reason` — populated only when denied via `Veto`, otherwise `None`
+- `bool(decision)` — returns `decision.allowed`
+
 #### More examples?
 
 - **ABAC** (Attribute-based Access Control) in Cadurso:
@@ -200,7 +245,11 @@ await cadurso.can(john).allowed_actions_on_async(johns_document)
 - **RBAC** (Role-based Access Control) in Cadurso:
   - The [`/tests/brazil/`](./tests/brazil) folder shows a full RBAC implementation set in the [Brazil (1985 film)](https://en.wikipedia.org/wiki/Brazil_(1985_film)) universe.
 
-> **Note:** If you've watched these films, the tests will be particularly enjoyable to read — you'll recognize characters, locations, and scenarios from the movies woven into the authorization rules! If you haven't seen them, I highly recommend watching these two excellent movies.
+
+- **Veto & AuthorizationDecision** in Cadurso:
+  - The [`/tests/inception/`](./tests/inception) folder demonstrates the `Veto` mechanism and `AuthorizationDecision` inspection, set in the [Inception (2010 film)](https://en.wikipedia.org/wiki/Inception) universe.
+
+> **Note:** If you've watched these films, the tests will be particularly enjoyable to read — you'll recognize characters, locations, and scenarios from the movies woven into the authorization rules! If you haven't seen them, I highly recommend watching these excellent movies.
 
 
 ## Contributing

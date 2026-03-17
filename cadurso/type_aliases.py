@@ -27,18 +27,42 @@ ResourceType = type[Resource]
 A ResourceType is a type that represents a Resource.
 """
 
-AuthorizationDecision = bool
-"""
-An AuthorizationDecision is a boolean that indicates whether an Actor is allowed to perform an Action on a Resource.
-"""
+
+class AuthorizationDecision:
+    """
+    The result of an authorization query. Carries the decision and an optional reason for denial.
+
+    Fully backward-compatible with boolean usage via ``__bool__``.
+    """
+
+    __slots__ = ("allowed", "reason")
+
+    def __init__(self, *, allowed: bool, reason: str | None = None) -> None:
+        self.allowed = allowed
+        self.reason = reason
+
+    def __bool__(self) -> bool:
+        return self.allowed
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, AuthorizationDecision):
+            return self.allowed == other.allowed and self.reason == other.reason
+        if isinstance(other, bool):
+            return self.allowed == other
+        return NotImplemented
+
+    def __repr__(self) -> str:
+        if self.reason is not None:
+            return f"AuthorizationDecision(allowed={self.allowed!r}, reason={self.reason!r})"
+        return f"AuthorizationDecision(allowed={self.allowed!r})"
+
 
 AuthorizationFunction = (
-    Callable[[Actor, Resource], AuthorizationDecision]
-    | Callable[[Actor, Resource], Awaitable[AuthorizationDecision]]
+    Callable[[Actor, Resource], bool] | Callable[[Actor, Resource], Awaitable[bool]]
 )
 """
 An AuthorizationFunction is a function that takes an Actor and a Resource and returns (synchronously or asynchronously)
-an AuthorizationDecision, representing the decision to allow or deny the Actor to perform an Action on the Resource.
+a bool, representing the decision to allow or deny the Actor to perform an Action on the Resource.
 """
 
 RuleStorageKey = tuple[ActorType, Action, ResourceType]

@@ -4,3 +4,7 @@
 .PHONY: mypy-watch
 mypy-watch:
 	watch -n 2 uv run mypy
+
+.PHONY: lint
+lint:
+	uv run pre-commit run --all-files

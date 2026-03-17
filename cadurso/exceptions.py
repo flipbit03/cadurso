@@ -24,3 +24,11 @@ class CadursoIncompleteQueryError(CadursoBaseError):
     """
 
     pass
+
+
+class Veto(Exception):
+    """Raised inside a rule function to hard-deny an authorization request with an optional reason."""
+
+    def __init__(self, reason: str | None = None) -> None:
+        self.reason = reason
+        super().__init__(reason)
