@@ -44,17 +44,17 @@ class AuthorizationDecision:
     def __bool__(self) -> bool:
         return self.allowed
 
-    def __repr__(self) -> str:
-        if self.reason is not None:
-            return f"AuthorizationDecision(allowed={self.allowed!r}, reason={self.reason!r})"
-        return f"AuthorizationDecision(allowed={self.allowed!r})"
-
     def __eq__(self, other: object) -> bool:
         if isinstance(other, AuthorizationDecision):
             return self.allowed == other.allowed and self.reason == other.reason
         if isinstance(other, bool):
             return self.allowed == other
         return NotImplemented
+
+    def __repr__(self) -> str:
+        if self.reason is not None:
+            return f"AuthorizationDecision(allowed={self.allowed!r}, reason={self.reason!r})"
+        return f"AuthorizationDecision(allowed={self.allowed!r})"
 
 
 AuthorizationFunction = (
