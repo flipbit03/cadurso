@@ -16,14 +16,18 @@ class OnResourceClause:
     can_query: CanQueryBuilder
     action: Action
 
-    def on(self, resource: Resource) -> AuthorizationDecision:
+    def on(
+        self, resource: Resource, *, raise_veto: bool = False
+    ) -> AuthorizationDecision:
         return self.can_query.cadurso.is_allowed(
-            self.can_query.actor, self.action, resource
+            self.can_query.actor, self.action, resource, raise_veto=raise_veto
         )
 
-    async def on_async(self, resource: Resource) -> AuthorizationDecision:
+    async def on_async(
+        self, resource: Resource, *, raise_veto: bool = False
+    ) -> AuthorizationDecision:
         return await self.can_query.cadurso.is_allowed_async(
-            self.can_query.actor, self.action, resource
+            self.can_query.actor, self.action, resource, raise_veto=raise_veto
         )
 
     def __bool__(self) -> Never:

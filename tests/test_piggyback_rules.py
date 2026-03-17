@@ -2,9 +2,7 @@
 
 from dataclasses import dataclass
 
-import pytest
-
-from cadurso import Cadurso
+from cadurso import Cadurso, Veto
 
 
 @dataclass
@@ -18,98 +16,127 @@ class Document:
     owner: User
 
 
-@pytest.fixture
-def authz(user_alice: User, user_bob: User) -> Cadurso:
+def test_piggyback_allows_through() -> None:
+    """A piggyback rule grants access when the delegated permission allows."""
     c = Cadurso()
 
     @c.add_rule("edit")
     def owner_can_edit(actor: User, resource: Document) -> bool:
         return actor == resource.owner
 
-    @c.add_rule("edit")
-    def admin_can_edit(actor: User, _resource: Document) -> bool:
-        return actor.admin
-
     @c.add_rule("view")
-    def anyone_who_can_edit_can_view(actor: User, resource: Document) -> bool:
-        """Piggyback: delegate to the edit permission."""
-        return bool(c.is_allowed(actor, "edit", resource))
-
-    @c.add_rule("view")
-    def anyone_who_can_edit_can_view_via_query(
-        actor: User, resource: Document
-    ) -> bool:
-        """Piggyback via fluent API."""
-        return bool(c.can(actor).do("edit").on(resource))
+    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
+        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
 
     c.freeze()
-    return c
+
+    alice = User(name="Alice")
+    doc = Document(owner=alice)
+    assert c.is_allowed(alice, "view", doc)
 
 
-@pytest.fixture
-def user_alice() -> User:
-    return User(name="Alice")
-
-
-@pytest.fixture
-def user_bob() -> User:
-    return User(name="Bob", admin=True)
-
-
-def test_owner_can_view_own_document(
-    authz: Cadurso, user_alice: User
-) -> None:
-    """Alice owns the doc, so edit is allowed, and view piggybacks on edit."""
-    doc = Document(owner=user_alice)
-    assert authz.is_allowed(user_alice, "view", doc)
-
-
-def test_admin_can_view_any_document(
-    authz: Cadurso, user_alice: User, user_bob: User
-) -> None:
-    """Bob is admin, so edit is allowed, and view piggybacks on edit."""
-    doc = Document(owner=user_alice)
-    assert authz.is_allowed(user_bob, "view", doc)
-
-
-def test_non_owner_non_admin_cannot_view(
-    authz: Cadurso, user_alice: User
-) -> None:
-    """Alice can't view Bob's doc (she's not admin, not owner)."""
-    bob = User(name="Bob")
-    doc = Document(owner=bob)
-    can_alice_view = authz.is_allowed(user_alice, "view", doc)
-    assert not can_alice_view
-    assert can_alice_view.reason is None
-
-
-def test_piggyback_with_veto() -> None:
-    """A piggybacked rule correctly reflects a Veto from the delegated permission."""
-    from cadurso import Veto
-
+def test_piggyback_denies_through() -> None:
+    """A piggyback rule denies access when the delegated permission denies."""
     c = Cadurso()
 
-    @c.add_rule("write")
-    def anyone_can_write(actor: User, _resource: Document) -> bool:
+    @c.add_rule("edit")
+    def owner_can_edit(actor: User, resource: Document) -> bool:
+        return actor == resource.owner
+
+    @c.add_rule("view")
+    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
+        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
+
+    c.freeze()
+
+    alice = User(name="Alice")
+    bob = User(name="Bob")
+    doc = Document(owner=alice)
+    can_bob_view = c.is_allowed(bob, "view", doc)
+    assert not can_bob_view
+    assert can_bob_view.reason is None
+
+
+def test_piggyback_propagates_veto_reason() -> None:
+    """raise_veto=True bubbles the Veto so the outer caller sees the reason."""
+    c = Cadurso()
+
+    @c.add_rule("edit")
+    def anyone_can_edit(actor: User, _resource: Document) -> bool:
         return True
 
-    @c.add_rule("write")
-    def suspended_cannot_write(actor: User, _resource: Document) -> bool:
+    @c.add_rule("edit")
+    def suspended_cannot_edit(actor: User, _resource: Document) -> bool:
         if actor.name == "Suspended":
             raise Veto("account suspended")
         return False
 
-    @c.add_rule("publish")
-    def publish_requires_write(actor: User, resource: Document) -> bool:
-        """Piggyback: can only publish if you can write."""
-        return bool(c.is_allowed(actor, "write", resource))
+    @c.add_rule("view")
+    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
+        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
 
     c.freeze()
 
     doc = Document(owner=User(name="Owner"))
 
-    can_normal_publish = c.is_allowed(User(name="Normal"), "publish", doc)
-    assert can_normal_publish
+    # Normal user: edit allowed, so view allowed
+    can_normal_view = c.is_allowed(User(name="Normal"), "view", doc)
+    assert can_normal_view
 
-    can_suspended_publish = c.is_allowed(User(name="Suspended"), "publish", doc)
-    assert not can_suspended_publish
+    # Suspended user: edit vetoed, veto bubbles through piggyback
+    can_suspended_view = c.is_allowed(User(name="Suspended"), "view", doc)
+    assert not can_suspended_view
+    assert can_suspended_view.reason == "account suspended"
+
+
+def test_piggyback_without_raise_veto_loses_reason() -> None:
+    """Without raise_veto=True, the Veto reason is lost in the piggyback."""
+    c = Cadurso()
+
+    @c.add_rule("edit")
+    def anyone_can_edit(actor: User, _resource: Document) -> bool:
+        return True
+
+    @c.add_rule("edit")
+    def suspended_cannot_edit(actor: User, _resource: Document) -> bool:
+        if actor.name == "Suspended":
+            raise Veto("account suspended")
+        return False
+
+    @c.add_rule("view")
+    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
+        # No raise_veto — Veto is caught inside is_allowed, bool() returns False
+        return bool(c.is_allowed(actor, "edit", resource))
+
+    c.freeze()
+
+    doc = Document(owner=User(name="Owner"))
+    can_suspended_view = c.is_allowed(User(name="Suspended"), "view", doc)
+    assert not can_suspended_view
+    assert can_suspended_view.reason is None  # reason lost
+
+
+def test_piggyback_via_fluent_api_propagates_veto() -> None:
+    """raise_veto=True works through the fluent can().do().on() API too."""
+    c = Cadurso()
+
+    @c.add_rule("edit")
+    def anyone_can_edit(actor: User, _resource: Document) -> bool:
+        return True
+
+    @c.add_rule("edit")
+    def suspended_cannot_edit(actor: User, _resource: Document) -> bool:
+        if actor.name == "Suspended":
+            raise Veto("account suspended")
+        return False
+
+    @c.add_rule("view")
+    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
+        return bool(c.can(actor).do("edit").on(resource, raise_veto=True))
+
+    c.freeze()
+
+    doc = Document(owner=User(name="Owner"))
+    can_suspended_view = c.is_allowed(User(name="Suspended"), "view", doc)
+    assert not can_suspended_view
+    assert can_suspended_view.reason == "account suspended"
