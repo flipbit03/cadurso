@@ -41,7 +41,14 @@ def test_inequality_different_reason() -> None:
     assert a != b
 
 
-def test_not_equal_to_other_types() -> None:
+def test_equal_to_matching_bool() -> None:
+    assert AuthorizationDecision(allowed=True) == True  # noqa: E712
+    assert AuthorizationDecision(allowed=False) == False  # noqa: E712
+    assert AuthorizationDecision(allowed=True) != False  # noqa: E712
+    assert AuthorizationDecision(allowed=False) != True  # noqa: E712
+
+
+def test_not_equal_to_non_bool_types() -> None:
     d = AuthorizationDecision(allowed=True)
-    assert d != True  # noqa: E712
     assert d != 1
+    assert d != "True"

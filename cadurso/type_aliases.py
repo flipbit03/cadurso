@@ -52,6 +52,8 @@ class AuthorizationDecision:
     def __eq__(self, other: object) -> bool:
         if isinstance(other, AuthorizationDecision):
             return self.allowed == other.allowed and self.reason == other.reason
+        if isinstance(other, bool):
+            return self.allowed == other
         return NotImplemented
 
 
