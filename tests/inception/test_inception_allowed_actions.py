@@ -20,7 +20,9 @@ def test_team_member_allowed_actions_on_normal_level(
     assert DreamPermission.KICK in actions
 
     # can().allowed_actions_on() returns the same set
-    arthurs_hotel_actions = inception_universe.can(arthur).allowed_actions_on(hotel_level)
+    arthurs_hotel_actions = inception_universe.can(arthur).allowed_actions_on(
+        hotel_level
+    )
     assert arthurs_hotel_actions == actions
 
 
@@ -75,7 +77,9 @@ def test_non_owner_totem_vetoed(
     assert TotemPermission.INSPECT not in actions
 
     # can().allowed_actions_on() also excludes vetoed actions
-    arthurs_totem_actions = inception_universe.can(arthur).allowed_actions_on(cobbs_totem)
+    arthurs_totem_actions = inception_universe.can(arthur).allowed_actions_on(
+        cobbs_totem
+    )
     assert TotemPermission.INSPECT not in arthurs_totem_actions
 
 
