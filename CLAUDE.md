@@ -33,4 +33,7 @@ Universe-independent tests (e.g., unit tests for `AuthorizationDecision`, `Veto`
 
 ## CI
 
-The `lints_and_checks` workflow runs `make lint` (which uses `uv run pre-commit run --all-files`) to ensure the same ruff version is used locally and in CI. Always run `make lint` before pushing.
+The `lints_and_checks` workflow runs `make lint` (which uses `uv run pre-commit run --all-files`) to ensure the same ruff version is used locally and in CI. Before pushing, always verify in this order:
+
+1. `uv run mypy` — types must be clean
+2. `make lint` — formatting and lint rules must pass
