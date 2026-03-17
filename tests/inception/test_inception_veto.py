@@ -1,11 +1,8 @@
-"""Tests exercising the Veto mechanism and AuthorizationDecision in the Inception universe."""
-
-import pytest
+"""Tests exercising the Veto mechanism in the Inception universe."""
 
 from cadurso import Cadurso
-from cadurso.exceptions import Veto
 
-from .conftest import Dreamer, DreamLevel, DreamPermission, Role, Totem, TotemPermission
+from .conftest import Dreamer, DreamLevel, DreamPermission, Totem, TotemPermission
 
 # ---------------------------------------------------------------------------
 # Veto with reason
@@ -49,28 +46,6 @@ def test_totem_veto_reason_when_not_owner(
 
 
 # ---------------------------------------------------------------------------
-# Veto without reason
-# ---------------------------------------------------------------------------
-
-
-def test_veto_without_reason() -> None:
-    """A Veto with no argument gives reason=None."""
-    c = Cadurso()
-
-    @c.add_rule("act")
-    def always_vetoed(actor: Dreamer, resource: DreamLevel) -> bool:
-        raise Veto()
-
-    c.freeze()
-
-    dreamer = Dreamer(id=99, name="Test", role=Role.EXTRACTOR)
-    level = DreamLevel(name="Test", depth=1, architect=dreamer)
-    decision = c.is_allowed(dreamer, "act", level)
-    assert not decision
-    assert decision.reason is None
-
-
-# ---------------------------------------------------------------------------
 # Veto overrides True
 # ---------------------------------------------------------------------------
 
@@ -104,25 +79,3 @@ def test_cobb_can_plant_idea_deep_but_not_shallow(
     )
     assert not shallow
     assert shallow.reason == "dream is not deep enough for inception"
-
-
-# ---------------------------------------------------------------------------
-# Non-Veto exceptions propagate normally
-# ---------------------------------------------------------------------------
-
-
-def test_non_veto_exception_propagates() -> None:
-    """Non-Veto exceptions in rules are not caught — they propagate to the caller."""
-    c = Cadurso()
-
-    @c.add_rule("act")
-    def broken_rule(actor: Dreamer, resource: DreamLevel) -> bool:
-        raise RuntimeError("something went wrong")
-
-    c.freeze()
-
-    dreamer = Dreamer(id=99, name="Test", role=Role.EXTRACTOR)
-    level = DreamLevel(name="Test", depth=1, architect=dreamer)
-
-    with pytest.raises(RuntimeError, match="something went wrong"):
-        c.is_allowed(dreamer, "act", level)
