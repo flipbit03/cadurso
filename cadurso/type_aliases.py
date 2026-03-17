@@ -58,11 +58,14 @@ class AuthorizationDecision:
 
 
 AuthorizationFunction = (
-    Callable[[Actor, Resource], bool] | Callable[[Actor, Resource], Awaitable[bool]]
+    Callable[[Actor, Resource], bool]
+    | Callable[[Actor, Resource], AuthorizationDecision]
+    | Callable[[Actor, Resource], Awaitable[bool]]
+    | Callable[[Actor, Resource], Awaitable[AuthorizationDecision]]
 )
 """
 An AuthorizationFunction is a function that takes an Actor and a Resource and returns (synchronously or asynchronously)
-a bool, representing the decision to allow or deny the Actor to perform an Action on the Resource.
+a bool or AuthorizationDecision, representing the decision to allow or deny the Actor to perform an Action on the Resource.
 """
 
 RuleStorageKey = tuple[ActorType, Action, ResourceType]

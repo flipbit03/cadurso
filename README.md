@@ -114,11 +114,11 @@ def admin_can_edit_any_document(actor: User, _resource: Document) -> bool:
     return actor.role == Role.ADMIN
 
 @cadurso.add_rule(DocumentPermission.VIEW)
-def anyone_who_can_edit_can_view(actor: User, resource: Document) -> bool:
+def anyone_who_can_edit_can_view(actor: User, resource: Document) -> AuthorizationDecision:
     """Any person who can EDIT a document can also, obviously, VIEW it."""
     # Piggyback on the EDIT permission with raise_veto=True so that
     # Veto reasons propagate through to the caller.
-    return bool(cadurso.is_allowed(actor, DocumentPermission.EDIT, resource, raise_veto=True))
+    return cadurso.is_allowed(actor, DocumentPermission.EDIT, resource, raise_veto=True)
 
 # Async rules are also okay, if you need them
 @cadurso.add_rule(DocumentPermission.VIEW)
@@ -238,23 +238,24 @@ Key properties:
 
 #### Piggyback Rules
 
-A rule can delegate to another permission check by calling `is_allowed()` internally. Use `raise_veto=True` so that any `Veto` from the delegated permission bubbles up with its reason intact:
+A rule can delegate to another permission check by calling `is_allowed()` internally. Since `is_allowed()` returns `AuthorizationDecision`, piggyback rules should use `-> AuthorizationDecision` as their return type.
+
+Use `raise_veto=True` so that any `Veto` from the delegated permission bubbles up with its reason intact:
 
 ```python
 @cadurso.add_rule(DocumentPermission.VIEW)
-def anyone_who_can_edit_can_view(actor: User, resource: Document) -> bool:
+def anyone_who_can_edit_can_view(actor: User, resource: Document) -> AuthorizationDecision:
     # If EDIT is vetoed, the Veto bubbles up — reason preserved.
-    # bool() converts AuthorizationDecision to bool for the return type.
-    return bool(cadurso.is_allowed(actor, DocumentPermission.EDIT, resource, raise_veto=True))
+    return cadurso.is_allowed(actor, DocumentPermission.EDIT, resource, raise_veto=True)
 ```
 
-Without `raise_veto=True`, a `Veto` on the inner call would be caught and converted to `AuthorizationDecision(allowed=False)`. The `bool()` would return `False`, and the outer caller would see a denial with `reason=None` — the original reason is lost.
+Without `raise_veto=True`, a `Veto` on the inner call would be caught and converted to `AuthorizationDecision(allowed=False)`. The outer caller would see a denial with `reason=None` — the original reason is lost.
 
 The `raise_veto` parameter is available on `is_allowed()`, `is_allowed_async()`, and the fluent API `.on()` / `.on_async()`:
 
 ```python
 # Fluent API equivalent
-return bool(cadurso.can(actor).do(DocumentPermission.EDIT).on(resource, raise_veto=True))
+return cadurso.can(actor).do(DocumentPermission.EDIT).on(resource, raise_veto=True)
 ```
 
 #### More examples?

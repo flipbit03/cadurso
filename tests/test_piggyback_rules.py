@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from cadurso import Cadurso, Veto
+from cadurso import AuthorizationDecision, Cadurso, Veto
 
 
 @dataclass
@@ -25,8 +25,8 @@ def test_piggyback_allows_through() -> None:
         return actor == resource.owner
 
     @c.add_rule("view")
-    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
-        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
+    def can_view_if_can_edit(actor: User, resource: Document) -> AuthorizationDecision:
+        return c.is_allowed(actor, "edit", resource, raise_veto=True)
 
     c.freeze()
 
@@ -44,8 +44,8 @@ def test_piggyback_denies_through() -> None:
         return actor == resource.owner
 
     @c.add_rule("view")
-    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
-        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
+    def can_view_if_can_edit(actor: User, resource: Document) -> AuthorizationDecision:
+        return c.is_allowed(actor, "edit", resource, raise_veto=True)
 
     c.freeze()
 
@@ -72,8 +72,8 @@ def test_piggyback_propagates_veto_reason() -> None:
         return False
 
     @c.add_rule("view")
-    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
-        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
+    def can_view_if_can_edit(actor: User, resource: Document) -> AuthorizationDecision:
+        return c.is_allowed(actor, "edit", resource, raise_veto=True)
 
     c.freeze()
 
@@ -104,9 +104,9 @@ def test_piggyback_without_raise_veto_loses_reason() -> None:
         return False
 
     @c.add_rule("view")
-    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
-        # No raise_veto — Veto is caught inside is_allowed, bool() returns False
-        return bool(c.is_allowed(actor, "edit", resource))
+    def can_view_if_can_edit(actor: User, resource: Document) -> AuthorizationDecision:
+        # No raise_veto — Veto is caught inside is_allowed, returns denied decision
+        return c.is_allowed(actor, "edit", resource)
 
     c.freeze()
 
@@ -131,8 +131,8 @@ def test_piggyback_via_fluent_api_propagates_veto() -> None:
         return False
 
     @c.add_rule("view")
-    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
-        return bool(c.can(actor).do("edit").on(resource, raise_veto=True))
+    def can_view_if_can_edit(actor: User, resource: Document) -> AuthorizationDecision:
+        return c.can(actor).do("edit").on(resource, raise_veto=True)
 
     c.freeze()
 
@@ -140,3 +140,23 @@ def test_piggyback_via_fluent_api_propagates_veto() -> None:
     can_suspended_view = c.is_allowed(User(name="Suspended"), "view", doc)
     assert not can_suspended_view
     assert can_suspended_view.reason == "account suspended"
+
+
+def test_piggyback_with_bool_return_type_still_works() -> None:
+    """Rules can still use -> bool with bool() wrapping if preferred."""
+    c = Cadurso()
+
+    @c.add_rule("edit")
+    def owner_can_edit(actor: User, resource: Document) -> bool:
+        return actor == resource.owner
+
+    @c.add_rule("view")
+    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
+        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
+
+    c.freeze()
+
+    alice = User(name="Alice")
+    doc = Document(owner=alice)
+    assert c.is_allowed(alice, "view", doc)
+    assert not c.is_allowed(User(name="Bob"), "view", doc)

@@ -118,9 +118,10 @@ class Cadurso:
                         error_auth_func_param_not_positional(parameter.kind, parameter)
                     )
 
-            # The return type must be boolean or an awaitable that returns a boolean
+            # The return type must be bool, AuthorizationDecision, or an awaitable
             if not (
                 rule_func_signature.return_annotation is bool
+                or rule_func_signature.return_annotation is AuthorizationDecision
                 or issubclass(rule_func_signature.return_annotation, asyncio.Future)
             ):
                 raise CadursoRuleDefinitionError(
