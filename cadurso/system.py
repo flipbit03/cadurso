@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 import logging
-from typing import Callable, Hashable, Self, cast
+from typing import Callable, Hashable, Self
 
 from cadurso.errors import (
     ERROR_AUTH_FUNC_ACTION_NOT_HASHABLE,
@@ -163,16 +163,16 @@ class Cadurso:
         for rule in self.rule_storage.get((type(actor), action, type(resource)), []):
             try:
                 if inspect.iscoroutinefunction(rule):
-                    decision = cast(bool, asyncio.run(rule(actor, resource)))
+                    decision = asyncio.run(rule(actor, resource))
                 else:
-                    decision = cast(bool, rule(actor, resource))
+                    decision = rule(actor, resource)
             except Veto as veto:
                 logger.debug(
                     f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}'
                 )
                 return AuthorizationDecision(allowed=False, reason=veto.reason)
 
-            if decision is True:
+            if bool(decision):
                 logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
                 allowed = True
             else:
@@ -207,7 +207,7 @@ class Cadurso:
                 )
                 return AuthorizationDecision(allowed=False, reason=veto.reason)
 
-            if decision is True:
+            if bool(decision):
                 logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
                 allowed = True
             else:
@@ -247,13 +247,13 @@ class Cadurso:
             for rule in rules:
                 try:
                     if inspect.iscoroutinefunction(rule):
-                        decision = cast(bool, asyncio.run(rule(actor, resource)))
+                        decision = asyncio.run(rule(actor, resource))
                     else:
-                        decision = cast(bool, rule(actor, resource))
+                        decision = rule(actor, resource)
                 except Veto:
                     break
 
-                if decision is True:
+                if bool(decision):
                     allowed = True
             else:
                 if allowed:
@@ -297,7 +297,7 @@ class Cadurso:
                 except Veto:
                     break
 
-                if decision is True:
+                if bool(decision):
                     allowed = True
             else:
                 if allowed:

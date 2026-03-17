@@ -118,7 +118,7 @@ def owner_can_edit_own_document(actor: User, resource: Document) -> bool:
     """Any person who can EDIT a document can also, obviously, VIEW it."""
     # Piggyback on the EDIT permission.
     # This way we don't need to write VIEW rules for both owners and admins.
-    return cadurso.can(actor).do(DocumentPermission.EDIT).on(resource)
+    return bool(cadurso.can(actor).do(DocumentPermission.EDIT).on(resource))
 
 # Async rules are also okay, if you need them
 @cadurso.add_rule(DocumentPermission.VIEW)
