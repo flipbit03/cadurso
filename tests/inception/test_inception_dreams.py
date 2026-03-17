@@ -14,6 +14,9 @@ def test_team_member_navigates(
 ) -> None:
     assert inception_universe.is_allowed(arthur, DreamPermission.NAVIGATE, hotel_level)
 
+    # Same check via fluent API
+    assert inception_universe.can(arthur).do(DreamPermission.NAVIGATE).on(hotel_level)
+
 
 def test_architect_navigates(
     inception_universe: Cadurso, ariadne: Dreamer, snow_fortress: DreamLevel
@@ -34,6 +37,14 @@ def test_mark_cannot_navigate_deep_levels(
 ) -> None:
     assert not inception_universe.is_allowed(
         fischer, DreamPermission.NAVIGATE, snow_fortress
+    )
+
+    # Same check via fluent API
+    assert (
+        not inception_universe
+        .can(fischer)
+        .do(DreamPermission.NAVIGATE)
+        .on(snow_fortress)
     )
 
 
@@ -114,6 +125,9 @@ def test_owner_inspects_own_totem(
     inception_universe: Cadurso, cobb: Dreamer, cobbs_totem: Totem
 ) -> None:
     assert inception_universe.is_allowed(cobb, TotemPermission.INSPECT, cobbs_totem)
+
+    # Same check via fluent API
+    assert inception_universe.can(cobb).do(TotemPermission.INSPECT).on(cobbs_totem)
 
 
 def test_arthur_inspects_own_totem(

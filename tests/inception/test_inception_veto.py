@@ -16,6 +16,11 @@ def test_collapsed_level_vetoes_navigation(
     assert not decision
     assert decision.reason == "dream level has collapsed"
 
+    # Fluent API returns the same AuthorizationDecision with reason
+    fluent = inception_universe.can(cobb).do(DreamPermission.NAVIGATE).on(limbo)
+    assert not fluent
+    assert fluent.reason == "dream level has collapsed"
+
 
 def test_collapsed_level_vetoes_architecting(
     inception_universe: Cadurso, cobb: Dreamer, limbo: DreamLevel
@@ -43,6 +48,11 @@ def test_totem_veto_reason_when_not_owner(
     )
     assert not decision
     assert decision.reason == "never let someone else touch your totem"
+
+    # Fluent API carries the same veto reason
+    fluent = inception_universe.can(eames).do(TotemPermission.INSPECT).on(cobbs_totem)
+    assert not fluent
+    assert fluent.reason == "never let someone else touch your totem"
 
 
 # ---------------------------------------------------------------------------
