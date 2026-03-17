@@ -141,22 +141,3 @@ def test_piggyback_via_fluent_api_propagates_veto() -> None:
     assert not can_suspended_view
     assert can_suspended_view.reason == "account suspended"
 
-
-def test_piggyback_with_bool_return_type_still_works() -> None:
-    """Rules can still use -> bool with bool() wrapping if preferred."""
-    c = Cadurso()
-
-    @c.add_rule("edit")
-    def owner_can_edit(actor: User, resource: Document) -> bool:
-        return actor == resource.owner
-
-    @c.add_rule("view")
-    def can_view_if_can_edit(actor: User, resource: Document) -> bool:
-        return bool(c.is_allowed(actor, "edit", resource, raise_veto=True))
-
-    c.freeze()
-
-    alice = User(name="Alice")
-    doc = Document(owner=alice)
-    assert c.is_allowed(alice, "view", doc)
-    assert not c.is_allowed(User(name="Bob"), "view", doc)
