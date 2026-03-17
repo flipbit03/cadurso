@@ -17,6 +17,7 @@ from cadurso.errors import (
 from cadurso.exceptions import (
     CadursoOperationalError,
     CadursoRuleDefinitionError,
+    Veto,
 )
 from cadurso.sugar import CanQueryBuilder
 from cadurso.type_aliases import (
@@ -152,27 +153,32 @@ class Cadurso:
         :param actor: The actor that is trying to perform an action on a resource.
         :param action:  The action that the actor is trying to perform.
         :param resource:  The resource that the actor is trying to perform the action on.
-        :return: A boolean indicating whether the actor is allowed to perform the action on the resource.
+        :return: An AuthorizationDecision indicating the outcome.
         """
         if not self.__frozen:
             raise CadursoOperationalError(ERROR_INSTANCE_NOT_FROZEN)
 
-        for rule in self.rule_storage.get((type(actor), action, type(resource)), []):
-            if inspect.iscoroutinefunction(rule):
-                decision = cast(bool, asyncio.run(rule(actor, resource)))
-            else:
-                decision = cast(bool, rule(actor, resource))
+        allowed = False
 
-            if decision is not True:
+        for rule in self.rule_storage.get((type(actor), action, type(resource)), []):
+            try:
+                if inspect.iscoroutinefunction(rule):
+                    decision = cast(bool, asyncio.run(rule(actor, resource)))
+                else:
+                    decision = cast(bool, rule(actor, resource))
+            except Veto as veto:
+                logger.debug(f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}')
+                return AuthorizationDecision(allowed=False, reason=veto.reason)
+
+            if decision is True:
+                logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
+                allowed = True
+            else:
                 logger.debug(
                     f'"{actor}" is not allowed to "{action}" on "{resource}", trying other rules...'
                 )
-                continue
 
-            logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
-            return True
-
-        return False
+        return AuthorizationDecision(allowed=allowed)
 
     async def is_allowed_async(
         self, actor: Actor, action: Action, resource: Resource
@@ -183,24 +189,29 @@ class Cadurso:
         :param actor: The actor that is trying to perform an action on a resource.
         :param action:  The action that the actor is trying to perform.
         :param resource:  The resource that the actor is trying to perform the action on.
-        :return: A boolean indicating whether the actor is allowed to perform the action on the resource.
+        :return: An AuthorizationDecision indicating the outcome.
         """
-        for rule in self.rule_storage.get((type(actor), action, type(resource)), []):
-            if inspect.iscoroutinefunction(rule):
-                decision = await rule(actor, resource)
-            else:
-                decision = rule(actor, resource)
+        allowed = False
 
-            if decision is not True:
+        for rule in self.rule_storage.get((type(actor), action, type(resource)), []):
+            try:
+                if inspect.iscoroutinefunction(rule):
+                    decision = await rule(actor, resource)
+                else:
+                    decision = rule(actor, resource)
+            except Veto as veto:
+                logger.debug(f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}')
+                return AuthorizationDecision(allowed=False, reason=veto.reason)
+
+            if decision is True:
+                logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
+                allowed = True
+            else:
                 logger.debug(
                     f'"{actor}" is not allowed to "{action}" on "{resource}", trying other rules...'
                 )
-                continue
 
-            logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
-            return True
-
-        return False
+        return AuthorizationDecision(allowed=allowed)
 
     def get_allowed_actions(self, actor: Actor, resource: Resource) -> set[Action]:
         """
@@ -227,15 +238,22 @@ class Cadurso:
             if stored_actor_type != actor_type or stored_resource_type != resource_type:
                 continue
 
+            allowed = False
+
             for rule in rules:
-                if inspect.iscoroutinefunction(rule):
-                    decision = cast(bool, asyncio.run(rule(actor, resource)))
-                else:
-                    decision = cast(bool, rule(actor, resource))
+                try:
+                    if inspect.iscoroutinefunction(rule):
+                        decision = cast(bool, asyncio.run(rule(actor, resource)))
+                    else:
+                        decision = cast(bool, rule(actor, resource))
+                except Veto:
+                    break
 
                 if decision is True:
+                    allowed = True
+            else:
+                if allowed:
                     allowed_actions.add(action)
-                    break  # No need to check other rules for this action
 
         return allowed_actions
 
@@ -264,15 +282,22 @@ class Cadurso:
             if stored_actor_type != actor_type or stored_resource_type != resource_type:
                 continue
 
+            allowed = False
+
             for rule in rules:
-                if inspect.iscoroutinefunction(rule):
-                    decision = await rule(actor, resource)
-                else:
-                    decision = rule(actor, resource)
+                try:
+                    if inspect.iscoroutinefunction(rule):
+                        decision = await rule(actor, resource)
+                    else:
+                        decision = rule(actor, resource)
+                except Veto:
+                    break
 
                 if decision is True:
+                    allowed = True
+            else:
+                if allowed:
                     allowed_actions.add(action)
-                    break  # No need to check other rules for this action
 
         return allowed_actions
 
