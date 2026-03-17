@@ -1,7 +1,7 @@
 import asyncio
 import inspect
 import logging
-from typing import Callable, Hashable, Self, cast
+from typing import Callable, Hashable, Self
 
 from cadurso.errors import (
     ERROR_AUTH_FUNC_ACTION_NOT_HASHABLE,
@@ -118,9 +118,10 @@ class Cadurso:
                         error_auth_func_param_not_positional(parameter.kind, parameter)
                     )
 
-            # The return type must be boolean or an awaitable that returns a boolean
+            # The return type must be bool, AuthorizationDecision, or an awaitable
             if not (
                 rule_func_signature.return_annotation is bool
+                or rule_func_signature.return_annotation is AuthorizationDecision
                 or issubclass(rule_func_signature.return_annotation, asyncio.Future)
             ):
                 raise CadursoRuleDefinitionError(
@@ -143,7 +144,12 @@ class Cadurso:
         return add_rule_inner
 
     def is_allowed(
-        self, actor: Actor, action: Action, resource: Resource
+        self,
+        actor: Actor,
+        action: Action,
+        resource: Resource,
+        *,
+        raise_veto: bool = False,
     ) -> AuthorizationDecision:
         """
         Evaluate a permission query synchronously.
@@ -153,6 +159,8 @@ class Cadurso:
         :param actor: The actor that is trying to perform an action on a resource.
         :param action:  The action that the actor is trying to perform.
         :param resource:  The resource that the actor is trying to perform the action on.
+        :param raise_veto: If True, re-raise Veto instead of catching it.
+            Use this inside piggyback rules so the Veto bubbles up to the outer evaluation.
         :return: An AuthorizationDecision indicating the outcome.
         """
         if not self.__frozen:
@@ -163,16 +171,18 @@ class Cadurso:
         for rule in self.rule_storage.get((type(actor), action, type(resource)), []):
             try:
                 if inspect.iscoroutinefunction(rule):
-                    decision = cast(bool, asyncio.run(rule(actor, resource)))
+                    decision = asyncio.run(rule(actor, resource))
                 else:
-                    decision = cast(bool, rule(actor, resource))
+                    decision = rule(actor, resource)
             except Veto as veto:
+                if raise_veto:
+                    raise
                 logger.debug(
                     f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}'
                 )
                 return AuthorizationDecision(allowed=False, reason=veto.reason)
 
-            if decision is True:
+            if bool(decision):
                 logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
                 allowed = True
             else:
@@ -183,7 +193,12 @@ class Cadurso:
         return AuthorizationDecision(allowed=allowed)
 
     async def is_allowed_async(
-        self, actor: Actor, action: Action, resource: Resource
+        self,
+        actor: Actor,
+        action: Action,
+        resource: Resource,
+        *,
+        raise_veto: bool = False,
     ) -> AuthorizationDecision:
         """
         Evaluate a permission query asynchronously.
@@ -191,6 +206,8 @@ class Cadurso:
         :param actor: The actor that is trying to perform an action on a resource.
         :param action:  The action that the actor is trying to perform.
         :param resource:  The resource that the actor is trying to perform the action on.
+        :param raise_veto: If True, re-raise Veto instead of catching it.
+            Use this inside piggyback rules so the Veto bubbles up to the outer evaluation.
         :return: An AuthorizationDecision indicating the outcome.
         """
         allowed = False
@@ -202,12 +219,14 @@ class Cadurso:
                 else:
                     decision = rule(actor, resource)
             except Veto as veto:
+                if raise_veto:
+                    raise
                 logger.debug(
                     f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}'
                 )
                 return AuthorizationDecision(allowed=False, reason=veto.reason)
 
-            if decision is True:
+            if bool(decision):
                 logger.debug(f'"{actor}" is allowed to "{action}" on "{resource}"')
                 allowed = True
             else:
@@ -247,13 +266,13 @@ class Cadurso:
             for rule in rules:
                 try:
                     if inspect.iscoroutinefunction(rule):
-                        decision = cast(bool, asyncio.run(rule(actor, resource)))
+                        decision = asyncio.run(rule(actor, resource))
                     else:
-                        decision = cast(bool, rule(actor, resource))
+                        decision = rule(actor, resource)
                 except Veto:
                     break
 
-                if decision is True:
+                if bool(decision):
                     allowed = True
             else:
                 if allowed:
@@ -297,7 +316,7 @@ class Cadurso:
                 except Veto:
                     break
 
-                if decision is True:
+                if bool(decision):
                     allowed = True
             else:
                 if allowed:
