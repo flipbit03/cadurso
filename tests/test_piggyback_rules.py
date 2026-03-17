@@ -140,4 +140,3 @@ def test_piggyback_via_fluent_api_propagates_veto() -> None:
     can_suspended_view = c.is_allowed(User(name="Suspended"), "view", doc)
     assert not can_suspended_view
     assert can_suspended_view.reason == "account suspended"
-
