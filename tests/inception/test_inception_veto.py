@@ -5,7 +5,7 @@ import pytest
 from cadurso import AuthorizationDecision, Cadurso
 from cadurso.exceptions import Veto
 
-from .conftest import DreamLevel, DreamPermission, Dreamer, Totem, TotemPermission
+from .conftest import DreamLevel, DreamPermission, Dreamer, Role, Totem, TotemPermission
 
 
 class TestVetoWithReason:
@@ -53,7 +53,7 @@ class TestVetoWithoutReason:
 
         c.freeze()
 
-        dreamer = Dreamer(id=99, name="Test", role="test")
+        dreamer = Dreamer(id=99, name="Test", role=Role.EXTRACTOR)
         level = DreamLevel(name="Test", depth=1, architect=dreamer)
         decision = c.is_allowed(dreamer, "act", level)
         assert not decision
@@ -98,7 +98,7 @@ class TestNonVetoExceptionsPropagateNormally:
 
         c.freeze()
 
-        dreamer = Dreamer(id=99, name="Test", role="test")
+        dreamer = Dreamer(id=99, name="Test", role=Role.EXTRACTOR)
         level = DreamLevel(name="Test", depth=1, architect=dreamer)
 
         with pytest.raises(RuntimeError, match="something went wrong"):

@@ -16,6 +16,31 @@ import pytest
 from cadurso import AuthorizationDecision, Cadurso, Veto
 
 # ---------------------------------------------------------------------------
+# Roles
+# ---------------------------------------------------------------------------
+
+
+class Role(Enum):
+    EXTRACTOR = auto()
+    """Specialists who steal secrets from within dreams."""
+
+    POINT_MAN = auto()
+    """Manages logistics and coordinates kicks across dream levels."""
+
+    ARCHITECT = auto()
+    """Designs the dream world's layout and mazes."""
+
+    FORGER = auto()
+    """Masters of disguise — can impersonate anyone within a dream."""
+
+    MARK = auto()
+    """The target of extraction or inception."""
+
+    PROJECTION = auto()
+    """A subconscious manifestation, not a real dreamer."""
+
+
+# ---------------------------------------------------------------------------
 # Actors
 # ---------------------------------------------------------------------------
 
@@ -34,7 +59,7 @@ class Dreamer:
 
     id: int
     name: str
-    role: str
+    role: Role
     sedated: bool = False
     kicked: bool = False
 
@@ -115,37 +140,37 @@ class TotemPermission(Enum):
 @pytest.fixture
 def cobb() -> Dreamer:
     """Dom Cobb — the extractor, leader of the inception team."""
-    return Dreamer(id=1, name="Cobb", role="extractor")
+    return Dreamer(id=1, name="Cobb", role=Role.EXTRACTOR)
 
 
 @pytest.fixture
 def arthur() -> Dreamer:
     """Arthur — the point man, meticulous and reliable."""
-    return Dreamer(id=2, name="Arthur", role="point_man")
+    return Dreamer(id=2, name="Arthur", role=Role.POINT_MAN)
 
 
 @pytest.fixture
 def ariadne() -> Dreamer:
     """Ariadne — the architect, designer of dream mazes."""
-    return Dreamer(id=3, name="Ariadne", role="architect")
+    return Dreamer(id=3, name="Ariadne", role=Role.ARCHITECT)
 
 
 @pytest.fixture
 def eames() -> Dreamer:
     """Eames — the forger, master of disguise within dreams."""
-    return Dreamer(id=4, name="Eames", role="forger")
+    return Dreamer(id=4, name="Eames", role=Role.FORGER)
 
 
 @pytest.fixture
 def fischer() -> Dreamer:
     """Robert Fischer — the mark, target of the inception."""
-    return Dreamer(id=5, name="Fischer", role="mark")
+    return Dreamer(id=5, name="Fischer", role=Role.MARK)
 
 
 @pytest.fixture
 def mal() -> Dreamer:
     """Mal — Cobb's deceased wife, a hostile projection that haunts dream levels."""
-    return Dreamer(id=6, name="Mal", role="projection", kicked=True)
+    return Dreamer(id=6, name="Mal", role=Role.PROJECTION, kicked=True)
 
 
 # ---------------------------------------------------------------------------
@@ -213,7 +238,7 @@ def inception_universe(
     @inception.add_rule(DreamPermission.NAVIGATE)
     def team_can_navigate(actor: Dreamer, _level: DreamLevel) -> bool:
         """Any team member (non-mark, non-projection) can navigate dream levels."""
-        return actor.role not in ("mark", "projection")
+        return actor.role not in (Role.MARK, Role.PROJECTION)
 
     @inception.add_rule(DreamPermission.NAVIGATE)
     def fischer_navigates_shallow_levels(actor: Dreamer, level: DreamLevel) -> bool:
@@ -250,7 +275,7 @@ def inception_universe(
     @inception.add_rule(DreamPermission.PLANT_IDEA)
     def extractor_can_plant_idea(actor: Dreamer, _level: DreamLevel) -> bool:
         """Only an extractor has the skill to plant an idea."""
-        return actor.role == "extractor"
+        return actor.role == Role.EXTRACTOR
 
     @inception.add_rule(DreamPermission.PLANT_IDEA)
     def must_be_deep_enough_to_plant(actor: Dreamer, level: DreamLevel) -> bool:
@@ -266,12 +291,12 @@ def inception_universe(
     @inception.add_rule(DreamPermission.KICK)
     def point_man_can_kick(actor: Dreamer, _level: DreamLevel) -> bool:
         """The point man coordinates kicks across dream levels."""
-        return actor.role == "point_man"
+        return actor.role == Role.POINT_MAN
 
     @inception.add_rule(DreamPermission.KICK)
     def anyone_can_kick_in_shallow(actor: Dreamer, level: DreamLevel) -> bool:
         """In the shallowest level, anyone on the team can trigger a kick."""
-        return level.depth == 1 and actor.role not in ("mark", "projection")
+        return level.depth == 1 and actor.role not in (Role.MARK, Role.PROJECTION)
 
     ########################################################
     # Totems
