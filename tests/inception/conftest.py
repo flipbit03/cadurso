@@ -8,12 +8,12 @@ The Veto mechanism models "kicks" — forceful ejections that override any permi
 might otherwise have within a dream level.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
 
 import pytest
 
-from cadurso import AuthorizationDecision, Cadurso, Veto
+from cadurso import Cadurso, Veto
 
 # ---------------------------------------------------------------------------
 # Roles

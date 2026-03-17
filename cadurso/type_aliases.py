@@ -27,6 +27,7 @@ ResourceType = type[Resource]
 A ResourceType is a type that represents a Resource.
 """
 
+
 class AuthorizationDecision:
     """
     The result of an authorization query. Carries the decision and an optional reason for denial.
@@ -55,8 +56,7 @@ class AuthorizationDecision:
 
 
 AuthorizationFunction = (
-    Callable[[Actor, Resource], bool]
-    | Callable[[Actor, Resource], Awaitable[bool]]
+    Callable[[Actor, Resource], bool] | Callable[[Actor, Resource], Awaitable[bool]]
 )
 """
 An AuthorizationFunction is a function that takes an Actor and a Resource and returns (synchronously or asynchronously)

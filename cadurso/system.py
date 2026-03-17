@@ -167,7 +167,9 @@ class Cadurso:
                 else:
                     decision = cast(bool, rule(actor, resource))
             except Veto as veto:
-                logger.debug(f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}')
+                logger.debug(
+                    f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}'
+                )
                 return AuthorizationDecision(allowed=False, reason=veto.reason)
 
             if decision is True:
@@ -200,7 +202,9 @@ class Cadurso:
                 else:
                     decision = rule(actor, resource)
             except Veto as veto:
-                logger.debug(f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}')
+                logger.debug(
+                    f'"{actor}" vetoed from "{action}" on "{resource}": {veto.reason}'
+                )
                 return AuthorizationDecision(allowed=False, reason=veto.reason)
 
             if decision is True:

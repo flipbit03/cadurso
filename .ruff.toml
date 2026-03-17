@@ -26,6 +26,7 @@ lint.ignore = [
     "N805", # First argument of a method should be named `self`
     "N811", # Constant imported as non-constant
     "N815", # mixedCase variable in class scope
+    "N818", # Exception name should be named with an Error suffix (Veto is control flow, not an error)
 ]
 
 lint.fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
