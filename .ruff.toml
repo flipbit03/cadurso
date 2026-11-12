@@ -1,5 +1,4 @@
 line-length = 88
-# No target-version: ruff takes the oldest supported Python from pyproject.toml's requires-python.
 
 src = ["tests", "cadurso"]
 
